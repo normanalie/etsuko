@@ -3,8 +3,10 @@ const { config } = require("dotenv");
 const fs = require("fs");
 const path = require("path");
 
+// 
 const Etudiants = {CPI1: 0, CPI2: 1, MT3: 2, MT4: 3, MT5: 4, IATIC3: 5, IATIC4: 6, IATIC5: 7, SEE3: 8, SEE4: 9, SEE5: 10, SNPI3: 11, SNPI4: 12, SNPI5: 13, M1CHPS: 14, M2CHPS: 15, M1IRS: 16, M2IRS: 17};
 
+// Roles ID
 var allemandCpi2 = "1147089909736292382";
 var espagnolCpi2 = "1147089915176300555";
 var allemandIatic3 = "1147089937414496317";
@@ -13,6 +15,7 @@ var chinoisIatic3 = "1147089947317239825";
 var allemandIatic4 = "1014655942547210260";
 var espagnolIatic4 = "1014655946930278533";
 var chinoisIatic4 = "1014655951212650607";
+// Temporary for role changing 
 var allemandCpi2Tmp;
 var espagnolCpi2Tmp;
 var allemandIatic3Tmp;
@@ -21,6 +24,7 @@ var chinoisIatic3Tmp;
 var allemandIatic4Tmp;
 var espagnolIatic4Tmp;
 var chinoisIatic4Tmp;
+
 
 const client = new Client({
     disableEveryone: true,
@@ -90,9 +94,8 @@ config({
 });
 
 client.on("ready", () => {
-    console.log(`I am now online, my name is ${client.user.username}`);
-
     client.user.setPresence({ status: 'online'});
+    console.log(`I am now online, my name is ${client.user.username}`);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -131,6 +134,8 @@ client.on(Events.InteractionCreate, async interaction => {
     // }
 });
 
+
+// Wait for messages in specific channel to add emoji reactions 
 client.on("messageCreate", async message => { /// => buttons ?
     if(message.channel.id === "884497820743237692") {
         await message.react('📖')
@@ -151,7 +156,6 @@ client.on("messageCreate", async message => { /// => buttons ?
             .then(() => message.react('🌑'))
             .then(() => message.react('🔥'))
             .then(() => message.react('💥'))
-            // .then(() => message.react('🧑‍🏫'))
             .then(() => message.react('🧑‍🦳'))
             .then(() => message.react('🧑‍🌾'));
     }
@@ -194,6 +198,8 @@ client.on("messageCreate", async message => { /// => buttons ?
             //if (oskour(message) && !message.author.bot) rep_oskour(message);
             // if (message.content.startsWith("!resetpromo")) resetpromo(message);
 });
+
+
 
 client.on("messageReactionAdd", (messageReaction, user) => {
     if(user.bot) return;
