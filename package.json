@@ -20,5 +20,8 @@
     "googleapis": "^110.0.0",
     "node": "^19.0.1",
     "ytdl-core": "^4.11.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.3"
   }
 }
