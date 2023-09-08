@@ -47,9 +47,6 @@ client.buttons = new Collection();
 
 module.exports = client;
 
-// fs.readdirSync('./handlers').forEach((handler) => {
-//     require(`./handlers/${handler}`)(client)
-// });
 
 // Commands
 client.commands = new Collection();
@@ -67,27 +64,6 @@ for (const file of commandFiles) {
         console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
     }
 }
-
-// // Buttons
-// client.buttons = new Collection();
-
-// const buttonsPath = path.join(__dirname, 'buttons');
-// const buttonFolders = fs.readdirSync(buttonsPath);
-
-// for (const folder of buttonFolders) {
-//     const folderPath = path.join(buttonsPath, folder);
-//     const buttonFiles = fs.readdirSync(folderPath).filter(file => file.endsWith(".js"));
-//     for (const file of buttonFiles) {
-//         const filePath = path.join(folderPath, file);
-//         const button = require(filePath);
-
-//         if ('data' in button && 'execute' in button) {
-//             client.buttons.set(button.id, button);
-//         } else {
-//             console.log(`[WARNING] The button at ${filePath} is missing a required "data" or "execute" property.`);
-//         }
-//     }
-// }
 
 config({
     path: __dirname + "/.env"
@@ -115,23 +91,6 @@ client.on(Events.InteractionCreate, async interaction => {
             await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
         }
     }
-
-    // //Buttons
-    // if (interaction.isButton()) {
-    //     const button = interaction.client.buttons.get(interaction.customId);
-
-    //     if (!button) {
-    //         console.error(`No button matching ${interaction.customId} was found.`);
-    //         return;
-    //     }
-
-    //     try {
-    //         await button.execute(interaction);
-    //     } catch (error) {
-    //         console.error(error);
-    //         await interaction.reply({ content: 'There was an error while executing this button script!', ephemeral: true });
-    //     }
-    // }
 });
 
 
@@ -186,17 +145,6 @@ client.on("messageCreate", async message => { /// => buttons ?
         message.react('🧐')
 			.then(() => message.react('😎'));
     }
-    
-            //if (message.guild && !message.content.startsWith(prefix)) await poteau(message);
-            //if (quoi(message)) rep_quoi(message);
-            //if (tek(message)) rep_tek(message);
-            //if (paf(message)) rep_paf(message);
-            //if (crois(message)) rep_crois(message);
-            //if (bon(message)) rep_bon(message);
-            //if (message.guild) await concourt(message);
-            //if (aled(message) && !message.author.bot) rep_aled(message);
-            //if (oskour(message) && !message.author.bot) rep_oskour(message);
-            // if (message.content.startsWith("!resetpromo")) resetpromo(message);
 });
 
 
@@ -633,31 +581,6 @@ async function create_category(message, roleEve, roleModo, roleMono, roleEtu, na
     const category = await message.guild.channels.create(name);
     console.log("After channel creation");
     return category.id;
-    
-    // let categoryId;
-    // await message.guild.channels.create(name, {type: 'category'}).then(c => {
-    //     c.overwritePermissions([
-    //         {
-    //             id: roleEve.id,
-    //             deny: ['VIEW_CHANNEL']
-    //         },
-    //         {
-    //             id: roleModo.id,
-    //             allow: ['SEND_MESSAGES']
-    //         },
-    //         {
-    //             id : roleEtu.id,
-    //             allow: ['VIEW_CHANNEL', 'MANAGE_CHANNELS']
-    //         },
-    //         {
-    //             id : roleMono.id,
-    //             allow: ['VIEW_CHANNEL'],
-    //             deny: ['SEND_MESSAGES']
-    //         }
-    //     ]);
-    //     categoryId = c.id;
-    // });
-    // return categoryId;
 }
 
 async function create_text_channel(message, roleEve, roleModo, roleMono, roleEtu, name, categoryId, position) {
@@ -1032,213 +955,5 @@ async function resetpromo(message) {
 
     console.log("C'est bon !");
 }
-
-/*function quoi(message) {
-    if (message.content.toLowerCase().endsWith("quoi")  || message.content.toLowerCase().endsWith("coi") || message.content.toLowerCase().endsWith("koi") || message.content.toLowerCase().endsWith("qoi")) {
-        return true;
-    } else if (message.content.toLowerCase().endsWith("quoi?")  || message.content.toLowerCase().endsWith("coi?") || message.content.toLowerCase().endsWith("koi?") || message.content.toLowerCase().endsWith("qoi?")) {
-        return true;
-    } else if (message.content.toLowerCase().endsWith("quoi ?")  || message.content.toLowerCase().endsWith("coi ?") || message.content.toLowerCase().endsWith("koi ?") || message.content.toLowerCase().endsWith("qoi ?")) {
-        return true;
-    } else {
-        return false;
-    }
-}*/
-
-/*async function rep_quoi(message) {
-    message.react('🇫')
-        .then(() => message.react('🇪'))
-        .then(() => message.react('🇺'))
-        .then(() => message.react('🇷'))
-        .then(() => message.react('💇'));
-}*/
-
-/*function tek(message) {
-    if (message.content.toLowerCase().endsWith("tek")  || message.content.toLowerCase().endsWith("teck") || message.content.toLowerCase().endsWith("tec") || message.content.toLowerCase().endsWith("teq") || message.content.toLowerCase().endsWith("teque") || message.content.toLowerCase().endsWith("theque") || message.content.toLowerCase().endsWith("thèque")) {
-        return true;
-    } else if (message.content.toLowerCase().endsWith("tek!")  || message.content.toLowerCase().endsWith("teck!") || message.content.toLowerCase().endsWith("tec!") || message.content.toLowerCase().endsWith("teq!") || message.content.toLowerCase().endsWith("teque!") || message.content.toLowerCase().endsWith("theque!") || message.content.toLowerCase().endsWith("thèque!")) {
-        return true;
-    } else if (message.content.toLowerCase().endsWith("tek !")  || message.content.toLowerCase().endsWith("teck !") || message.content.toLowerCase().endsWith("tec !") || message.content.toLowerCase().endsWith("teq !") || message.content.toLowerCase().endsWith("teque !") || message.content.toLowerCase().endsWith("theque !") || message.content.toLowerCase().endsWith("thèque !")) {
-        return true;
-    } else if (message.content.toLowerCase().endsWith("tek?")  || message.content.toLowerCase().endsWith("teck?") || message.content.toLowerCase().endsWith("tec?") || message.content.toLowerCase().endsWith("teq?") || message.content.toLowerCase().endsWith("teque?") || message.content.toLowerCase().endsWith("theque?") || message.content.toLowerCase().endsWith("thèque?")) {
-        return true;
-    } else if (message.content.toLowerCase().endsWith("tek ?")  || message.content.toLowerCase().endsWith("teck ?") || message.content.toLowerCase().endsWith("tec ?") || message.content.toLowerCase().endsWith("teq ?") || message.content.toLowerCase().endsWith("teque ?") || message.content.toLowerCase().endsWith("theque ?") || message.content.toLowerCase().endsWith("thèque ?")) {
-        return true;
-    } else {
-        return false;
-    }
-}*/
-
-/*async function rep_tek(message) {
-    message.react('🇵')
-        .then(() => message.react('🇦'))
-        .then(() => message.react('🇫'))
-        .then(() => message.react('❗'));
-}*/
-
-/*function paf(message) {
-    if (message.content.toLowerCase().endsWith("paf") || message.content.toLowerCase().endsWith("paf,") || message.content.toLowerCase().endsWith("paf.") || message.content.toLowerCase().endsWith("paf!") || message.content.toLowerCase().endsWith("paf !") || message.content.toLowerCase().endsWith("paf?") || message.content.toLowerCase().endsWith("paf ?"))
-        return true;
-    else
-        return false;
-}*/
-
-/*async function rep_paf(message) {
-    message.react('🇹')
-        .then(() => message.react('🇪'))
-        .then(() => message.react('🇰'))
-        .then(() => message.react('❗'));
-}*/
-
-/*function crois(message) {
-    if (message.content.toLowerCase().endsWith("crois")  || message.content.toLowerCase().endsWith("croa") || message.content.toLowerCase().endsWith("croit") || message.content.toLowerCase().endsWith("croix") || message.content.toLowerCase().endsWith("croi")) {
-        return true;
-    } else if (message.content.toLowerCase().endsWith("crois?")  || message.content.toLowerCase().endsWith("croa?") || message.content.toLowerCase().endsWith("croit?") || message.content.toLowerCase().endsWith("croix?") || message.content.toLowerCase().endsWith("croi?")) {
-        return true;
-    } else if (message.content.toLowerCase().endsWith("crois ?")  || message.content.toLowerCase().endsWith("croa ?") || message.content.toLowerCase().endsWith("croit ?") || message.content.toLowerCase().endsWith("croix ?") || message.content.toLowerCase().endsWith("croi ?")) {
-        return true;
-    } else {
-        return false;
-    }
-}*/
-
-/*async function rep_crois(message) {
-    message.react('🇸')
-        .then(() => message.react('🇦'))
-        .then(() => message.react('🇳'))
-        .then(() => message.react('🇹'))
-        .then(() => message.react('🥐'));
-}*/
-
-/*function bon(message) {
-    if (message.content.toLowerCase().endsWith("bon") || message.content.toLowerCase().endsWith("bon,") || message.content.toLowerCase().endsWith("bon.") || message.content.toLowerCase().endsWith("bon!") || message.content.toLowerCase().endsWith("bon !") || message.content.toLowerCase().endsWith("bon?") || message.content.toLowerCase().endsWith("bon ?"))
-        return true;
-    else
-        return false;
-}*/
-
-/*async function rep_bon(message) {
-    const date = new Date();
-
-    if(date.getHours() >= 6 && date.getHours() < 18) {
-        message.react('🇯')
-        .then(() => message.react('🇴'))
-        .then(() => message.react('🇺'))
-        .then(() => message.react('🇷'))
-        .then(() => message.react('☀️'));
-    }
-    else {
-        message.react('🇸')
-        .then(() => message.react('🇴'))
-        .then(() => message.react('🇮'))
-        .then(() => message.react('🇷'))
-        .then(() => message.react('🌕'));
-    }
-}*/
-
-/*function aled(message) {
-    let lettres = message.content.split('');
-
-    for(let i = 0; i < lettres.length && (lettres.length - i) >= 4; i++) {
-        if(lettres[i].toLowerCase() === "a") {
-            if(lettres[i+1].toLowerCase() === "l") {
-                if(lettres[i+2].toLowerCase() === "e") {
-                    if(lettres[i+3].toLowerCase() === "d") {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-
-    return false;
-}*/
-
-/*async function rep_aled(message) {
-    message.react('🅾')
-        .then(() => message.react('🇸'))
-        .then(() => message.react('🇰'))
-        .then(() => message.react('🇴'))
-        .then(() => message.react('🇺'))
-        .then(() => message.react('🇷'));
-}*/
-
-/*function oskour(message) {
-    let lettres = message.content.split('');
-
-    for(let i = 0; i < lettres.length && (lettres.length - i) >= 6; i++) {
-        if(lettres[i].toLowerCase() === "o") {
-            if(lettres[i+1].toLowerCase() === "s") {
-                if(lettres[i+2].toLowerCase() === "k") {
-                    if(lettres[i+3].toLowerCase() === "o") {
-                        if(lettres[i+4].toLowerCase() === "u") {
-                            if(lettres[i+5].toLowerCase() === "r") {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return false;
-}*/
-
-/*async function rep_oskour(message) {
-    message.react('🅰')
-        .then(() => message.react('🇱'))
-        .then(() => message.react('🇪'))
-        .then(() => message.react('🇩'));
-}*/
-
-/*function poteau(message) {
-    let lettres = message.content.split('');
-
-    for(let i = 0; i < lettres.length && (lettres.length - i) >= 6; i++) {
-        if(lettres[i].toLowerCase() === "p") {
-            if(lettres[i+1].toLowerCase() === "o") {
-                if(lettres[i+2].toLowerCase() === "t") {
-                    if(lettres[i+3].toLowerCase() === "e") {
-                        if(lettres[i+4].toLowerCase() === "a") {
-                            if(lettres[i+5].toLowerCase() === "u") {
-                                let serge = message.guild.emojis.cache.find(e => e.name === "SERGE");
-
-                                if(serge) {
-                                    message.react(serge);
-                                } else {
-                                    message.channel.send(`SERGE !`);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}*/
-
-/*function concourt(message) {
-    let lettres = message.content.split('');
-
-    if(message.author.id !== "290231852755582978") return;
-
-    for(let i = 0; i < lettres.length && (lettres.length - i) >= 5; i++) {
-        if(lettres[i].toLowerCase() === "d") {
-            if(lettres[i+1].toLowerCase() === "u") {
-                if(lettres[i+2].toLowerCase() === "e") {
-                    if(lettres[i+3].toLowerCase() === "l") {
-                        if(lettres[i+4].toLowerCase() === "!") {
-                            if(message.attachments.size > 0) {
-                                message.react("1️⃣");
-                                message.react("2️⃣");
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}*/
 
 client.login(process.env.TOKEN);
