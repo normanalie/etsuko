@@ -1,9 +1,15 @@
 const { Collection } = require('discord.js')
-
 const fs = require('fs')
 const path = require('path')
 
-module.exports = function collectSlashCommands(directory_path) {
+const handleSlashCommand = async (interaction) => {
+    const command = interaction.client.commands.get(interaction.commandName)
+    if (!command)
+        throw `[COMMAND] No command matching ${interaction.commandName} was found.`
+    await command.execute(interaction)
+}
+
+const collectSlashCommands = (directory_path) => {
     let commands = new Collection()
     const files = fs
         .readdirSync(directory_path)
@@ -23,3 +29,6 @@ module.exports = function collectSlashCommands(directory_path) {
     })
     return commands
 }
+
+exports.handleSlashCommand = handleSlashCommand
+exports.collectSlashCommands = collectSlashCommands

@@ -5,9 +5,11 @@ const {
     Partials,
     Events,
 } = require('discord.js')
-const { config } = require('dotenv')
+require('dotenv').config()
 const fs = require('fs')
 const path = require('path')
+
+const { handleSlashCommand } = require('./handlers/commands')
 
 //
 const Etudiants = {
@@ -52,10 +54,6 @@ var chinoisIatic4Tmp
 
 const client = require('./connect')
 
-config({
-    path: __dirname + '/.env',
-})
-
 client.on('ready', () => {
     client.user.setPresence({ status: 'online' })
     console.log(
@@ -66,23 +64,21 @@ client.on('ready', () => {
 client.on(Events.InteractionCreate, async (interaction) => {
     //Commands
     if (interaction.isChatInputCommand()) {
-        const command = interaction.client.commands.get(interaction.commandName)
-
-        if (!command) {
-            console.error(
-                `No command matching ${interaction.commandName} was found.`
-            )
-            return
-        }
-
         try {
-            await command.execute(interaction)
+            await handleSlashCommand(interaction)
         } catch (error) {
             console.error(error)
-            await interaction.reply({
-                content: 'There was an error while executing this command!',
-                ephemeral: true,
-            })
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({
+                    content: 'There was an error while executing this command!',
+                    ephemeral: true,
+                })
+            } else {
+                await interaction.reply({
+                    content: 'There was an error while executing this command!',
+                    ephemeral: true,
+                })
+            }
         }
     }
 })

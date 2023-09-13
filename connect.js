@@ -5,7 +5,7 @@ const {
     Partials,
     Events,
 } = require('discord.js')
-const collectSlashCommands = require('./commands')
+const { collectSlashCommands } = require('./handlers/commands')
 const path = require('path')
 require('dotenv').config()
 
