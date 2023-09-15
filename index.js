@@ -10,8 +10,8 @@ const fs = require('fs')
 const path = require('path')
 
 const { handleSlashCommand } = require('./handlers/commands')
+const { addReactions } = require('./handlers/messages')
 
-//
 const Etudiants = {
     CPI1: 0,
     CPI2: 1,
@@ -62,7 +62,6 @@ client.on('ready', () => {
 })
 
 client.on(Events.InteractionCreate, async (interaction) => {
-    //Commands
     if (interaction.isChatInputCommand()) {
         try {
             await handleSlashCommand(interaction)
@@ -83,58 +82,59 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 })
 
+const channels = {
+    choix_de_la_filliere: '884497820743237692',
+    changement_filliere: '884834854615785522',
+    roles_detente: '884842022589050900',
+    vision_d_aigle: '886387568093065226',
+    choix_lv2_cpi2: '884498054466666587',
+    choix_lv2_iatic: '884498154794414080',
+}
 // Wait for messages in specific channel to add emoji reactions
 client.on('messageCreate', async (message) => {
-    /// => buttons ?
-    if (message.channel.id === '884497820743237692') {
-        await message
-            .react('📖')
-            .then(() => message.react('📚'))
-            .then(() => message.react('🧑‍🔧'))
-            .then(() => message.react('🦿'))
-            .then(() => message.react('🦾'))
-            .then(() => message.react('🧑‍💻'))
-            .then(() => message.react('🖥️'))
-            .then(() => message.react('💻'))
-            .then(() => message.react('💡'))
-            .then(() => message.react('📡'))
-            .then(() => message.react('🛰️'))
-            .then(() => message.react('🧑‍🏭'))
-            .then(() => message.react('🤖'))
-            .then(() => message.react('🏭'))
-            .then(() => message.react('🌍'))
-            .then(() => message.react('🌑'))
-            .then(() => message.react('🔥'))
-            .then(() => message.react('💥'))
-            .then(() => message.react('🧑‍🦳'))
-            .then(() => message.react('🧑‍🌾'))
+    if (message.channel.id === channels.choix_de_la_filliere) {
+        addReactions(message, [
+            '📖',
+            '📚',
+            '🧑‍🔧',
+            '🦿',
+            '🦾',
+            '🧑‍💻',
+            '🖥️',
+            '💻',
+            '💡',
+            '📡',
+            '🛰️',
+            '🧑‍🏭',
+            '🤖',
+            '🏭',
+            '🌍',
+            '🌑',
+            '🔥',
+            '💥',
+            '🧑‍🦳',
+            '🧑‍🌾',
+        ])
     }
 
-    if (message.channel.id === '884498054466666587') {
-        message.react('🇩🇪').then(() => message.react('🇪🇸'))
+    if (message.channel.id === channels.choix_lv2_cpi2) {
+        addReactions(message, ['🇩🇪', '🇪🇸'])
     }
 
-    if (message.channel.id === '884498154794414080') {
-        message
-            .react('🇩🇪')
-            .then(() => message.react('🇪🇸'))
-            .then(() => message.react('🇨🇳'))
+    if (message.channel.id === channels.choix_lv2_iatic) {
+        addReactions(message, ['🇩🇪', '🇪🇸', '🇨🇳'])
     }
 
-    if (message.channel.id === '884842022589050900') {
-        message
-            .react('🎮')
-            .then(() => message.react('❌'))
-            .then(() => message.react('🛋️'))
-            .then(() => message.react('🚪'))
+    if (message.channel.id === channels.roles_detente) {
+        addReactions(message, ['🎮', '❌', '🛋️', '🚪'])
     }
 
-    if (message.channel.id === '884834854615785522') {
+    if (message.channel.id === channels.changement_filliere) {
         message.react('🔄')
     }
 
-    if (message.channel.id === '886387568093065226') {
-        message.react('🧐').then(() => message.react('😎'))
+    if (message.channel.id === channels.vision_d_aigle) {
+        addReactions(message, ['🧐', '😎'])
     }
 })
 
