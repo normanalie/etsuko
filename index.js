@@ -141,351 +141,99 @@ client.on('messageCreate', async (message) => {
 client.on('messageReactionAdd', (messageReaction, user) => {
     if (user.bot) return
 
-    let role
+    let roleName
     let etud = false
-
+    let guild = messageReaction.message.guild
     switch (messageReaction.message.channel.id) {
-        case '884497820743237692':
+        case channels.choix_de_la_filliere:
             switch (messageReaction.emoji.name) {
                 case '📖':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'CPI 1')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'CPI 1'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'CPI 1'
                     etud = true
                     break
 
                 case '📚':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'CPI 2')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'CPI 2'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'CPI 2'
                     etud = true
                     break
 
                 case '🧑‍🔧':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'MT 3')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'MT 3'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'MT 3'
                     etud = true
                     break
 
                 case '🦿':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'MT 4')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'MT 4'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'MT 4'
                     etud = true
                     break
 
                 case '🦾':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'MT 5')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'MT 5'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'MT 5'
                     etud = true
                     break
 
                 case '🧑‍💻':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'IATIC 3')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'IATIC 3'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'IATIC 3'
                     etud = true
                     break
 
                 case '🖥️':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'IATIC 4')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'IATIC 4'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'IATIC 4'
                     etud = true
                     break
 
                 case '💻':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'IATIC 5')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'IATIC 5'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'IATIC 5'
                     etud = true
                     break
 
                 case '💡':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'SEE 3')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'SEE 3'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'SEE 3'
                     etud = true
                     break
 
                 case '📡':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'SEE 4')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'SEE 4'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'SEE 4'
                     etud = true
                     break
 
                 case '🛰️':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'SEE 5')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'SEE 5'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'SEE 5'
                     etud = true
                     break
 
                 case '🧑‍🏭':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'SNPI 3')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'SNPI 3'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'SNPI 3'
                     etud = true
                     break
 
                 case '🤖':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'SNPI 4')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'SNPI 4'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'SNPI 4'
                     etud = true
                     break
 
                 case '🏭':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'SNPI 5')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'SNPI 5'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'SNPI 5'
                     etud = true
                     break
 
                 case '🌍':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'M1 IRS')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'M1 IRS'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'M1 IRS'
                     etud = true
                     break
 
                 case '🌑':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'M2 IRS')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'M2 IRS'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'M2 IRS'
                     etud = true
                     break
 
                 case '🔥':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'M1 CHPS')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'M1 CHPS'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'M1 CHPS'
                     etud = true
                     break
 
                 case '💥':
-                    if (
-                        !messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.cache.filter(
-                                (r) => r.id !== messageReaction.message.guild.id
-                            )
-                            .find((r) => r.name === 'M2 CHPS')
-                    ) {
-                        role = messageReaction.message.guild.roles.cache.find(
-                            (r) => r.name === 'M2 CHPS'
-                        )
-                        messageReaction.message.guild.members.cache
-                            .find((m) => m.id === user.id)
-                            .roles.add(role.id)
-                    }
+                    roleName = 'M2 CHPS'
                     etud = true
                     break
 
@@ -558,6 +306,15 @@ client.on('messageReactionAdd', (messageReaction, user) => {
                 default:
                     break
             }
+            if (roleName) {
+                const role = guild.roles.cache.find(
+                    (role) => role.name === roleName
+                )
+                const member = guild.members.cache.find(
+                    (member) => member.id === user.id
+                )
+                member.roles.add(role.id)
+            }
 
             if (etud) {
                 if (
@@ -595,7 +352,7 @@ client.on('messageReactionAdd', (messageReaction, user) => {
             messageReaction.users.remove(user.id)
             break
 
-        case '884498054466666587':
+        case channels.choix_lv2_cpi2:
             switch (messageReaction.emoji.name) {
                 case '🇩🇪':
                     if (
@@ -634,7 +391,7 @@ client.on('messageReactionAdd', (messageReaction, user) => {
             messageReaction.users.remove(user.id)
             break
 
-        case '884498154794414080':
+        case channels.choix_lv2_iatic:
             switch (messageReaction.emoji.name) {
                 case '🇩🇪':
                     if (
@@ -724,7 +481,7 @@ client.on('messageReactionAdd', (messageReaction, user) => {
             messageReaction.users.remove(user.id)
             break
 
-        case '884842022589050900':
+        case channels.roles_detente:
             switch (messageReaction.emoji.name) {
                 case '🎮':
                     if (
@@ -805,7 +562,7 @@ client.on('messageReactionAdd', (messageReaction, user) => {
             messageReaction.users.remove(user.id)
             break
 
-        case '886387568093065226':
+        case channels.vision_d_aigle:
             switch (messageReaction.emoji.name) {
                 case '🧐':
                     if (
@@ -850,7 +607,7 @@ client.on('messageReactionAdd', (messageReaction, user) => {
             messageReaction.users.remove(user.id)
             break
 
-        case '884834854615785522':
+        case channels.changement_filliere:
             switch (messageReaction.emoji.name) {
                 case '🔄':
                     add_role_by_name(
