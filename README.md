@@ -13,4 +13,4 @@ Are you interested in ISTY and would like to contribute to this bot?
  - Setup your Discord's Developper Credentials in `.env` file. You have an example in `.env.example`
  - Run `npm i`
  - Run `npm run start`
-
+ - Once you finished your code, open a PR
