@@ -1,252 +1,332 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { compareArrays } = require("../functions.js");
-const wait = require('node:timers/promises').setTimeout;
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const { compareArrays } = require('../functions.js')
+const wait = require('node:timers/promises').setTimeout
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('pendu')
-        .setDescription("Lance une partie de pendu")
-        .addStringOption(option =>
-            option.setName('prompt')
-                .setDescription("Ton mot ou ta phrase pour le pendu")
-                .setRequired(true)),
+        .setDescription('Lance une partie de pendu')
+        .addStringOption((option) =>
+            option
+                .setName('prompt')
+                .setDescription('Ton mot ou ta phrase pour le pendu')
+                .setRequired(true)
+        ),
     async execute(interaction) {
         // Send message to inform that the command is starting
         try {
-            interaction.deferReply({ fetchReply: true });
+            interaction.deferReply({ fetchReply: true })
         } catch (error) {
-            return;
+            console.error(error)
         }
 
         // Get the prompt for the game
-        const toFind = interaction.options.getString('prompt');
-        let thread;
+        const toFind = interaction.options.getString('prompt')
+        let thread
 
         // Try to create a thread for the current game
         try {
             if (!interaction.channel.threads) {
                 try {
-                    await interaction.deleteReply();
+                    await interaction.deleteReply()
+                    console.log("[COMMANDS] - Pendu: No thread.")
                 } catch (error) {
-                    
+                    console.error(error)
                 }
-                return;
+                return
             }
             thread = await interaction.channel.threads.create({
                 name: `Pendu de ${interaction.member.displayName} (en cours)`,
-                autoArchiveDuration: 60
-            });
+                autoArchiveDuration: 60,
+            })
         } catch (error) {
+            console.error(error)
+            console.error("[COMMANDS] - Pendu: Error during thread creation.")
             try {
-                await interaction.deleteReply();
+                await interaction.deleteReply()
             } catch (error) {
-                
+                console.error(error)
             }
-            return;
+            return
         }
-        
+
         try {
-            await interaction.deleteReply();
+            await interaction.deleteReply()
         } catch (error) {
-            
+            console.error(error)
         }
 
         // Set the variables for the game
-        let toFindArray = toFind.split('');
-        let displayedArray = discoverLetter(toFindArray, initDisplayArray(toFindArray), toFindArray[0]);
-        let usedItems = {letters: [toFindArray[0]], words: []};
+        let toFindArray = toFind.split('')
+        let displayedArray = discoverLetter(
+            toFindArray,
+            initDisplayArray(toFindArray),
+            toFindArray[0]
+        )
+        let usedItems = { letters: [toFindArray[0]], words: [] }
 
         // The first message in the thread
         let embed = new EmbedBuilder()
-            .setColor("Green")
-            .setTitle(`Jeu du pendu lancé par ${interaction.member.displayName}`)
-            .addFields(
-                { name: "Mot à trouver", value: displayedArray.join(" "), inline: false },
-                { name: "Attention", value: `Lettres utilisées : ${usedItems.letters.join(", ")}\nMots proposés : ${usedItems.words.join(", ")}`, inline: false }
+            .setColor('Green')
+            .setTitle(
+                `Jeu du pendu lancé par ${interaction.member.displayName}`
             )
-            .setImage("https://media.discordapp.net/attachments/1063188671995596873/1063188684586893372/uploads.png");
+            .addFields(
+                {
+                    name: 'Mot à trouver',
+                    value: displayedArray.join(' '),
+                    inline: false,
+                },
+                {
+                    name: 'Attention',
+                    value: `Lettres utilisées : ${usedItems.letters.join(
+                        ', '
+                    )}\nMots proposés : ${usedItems.words.join(', ')}`,
+                    inline: false,
+                }
+            )
+            .setImage(
+                'https://media.discordapp.net/attachments/1063188671995596873/1063188684586893372/uploads.png'
+            )
 
         // Start the game
         try {
-            thread.send({ embeds: [embed] }).then(message => {
-                game(message, toFindArray, displayedArray, usedItems, 0, embed);
-            });
+            thread.send({ embeds: [embed] }).then((message) => {
+                game(message, toFindArray, displayedArray, usedItems, 0, embed)
+            })
         } catch (error) {
-            
+            console.error(error)
+            console.error("[COMMANDS] - Pendu: Can't send message in the thread.")
         }
-    }
+    },
 }
 
 // Returns an array representing the start of the game
 function initDisplayArray(toFindArray) {
-    let displayedArray = [];
+    let displayedArray = []
 
     for (let i = 0; i < toFindArray.length; i++) {
         if (toFindArray[i].match(/[a-z]/i)) {
-            displayedArray.push("█");
-        } else if (toFindArray[i] === " ") {
-            toFindArray[i] = " ";
-            displayedArray.push(" ");
+            displayedArray.push('█')
+        } else if (toFindArray[i] === ' ') {
+            toFindArray[i] = ' '
+            displayedArray.push(' ')
         } else {
-            displayedArray.push(toFindArray[i]);
+            displayedArray.push(toFindArray[i])
         }
     }
 
-    return displayedArray;
+    return displayedArray
 }
 
 // Try to discover letters to update the 'displayArray' array
 function discoverLetter(toFindArray, displayedArray, letter) {
-    let upperCase = false;
-    if (letter === letter.toUpperCase())
-        upperCase = true;
+    let upperCase = false
+    if (letter === letter.toUpperCase()) upperCase = true
 
     for (let i = 0; i < toFindArray.length; i++) {
         if (toFindArray[i] === letter) {
-            displayedArray[i] = letter;
+            displayedArray[i] = letter
         } else if (upperCase) {
             if (toFindArray[i] === letter.toLowerCase())
-                displayedArray[i] = letter.toLowerCase();
+                displayedArray[i] = letter.toLowerCase()
         } else if (!upperCase) {
             if (toFindArray[i] === letter.toUpperCase())
-                displayedArray[i] = letter.toUpperCase();
+                displayedArray[i] = letter.toUpperCase()
         }
     }
 
-    return displayedArray;
+    return displayedArray
 }
 
 // Check if the letter is in the prompt
 function isLetterInWord(toFindArray, letter) {
     for (let i = 0; i < toFindArray.length; i++) {
-        if (toFindArray[i].toLowerCase() === letter.toLowerCase())
-            return true;
+        if (toFindArray[i].toLowerCase() === letter.toLowerCase()) return true
     }
-    return false;
+    return false
 }
 
 // Update the message depending on the current state of the game (color, image, used words or letters and current display of the prompt)
 function updateEmbed(embed, failCounter, displayedArray, usedItems) {
     let colors = [
-        "#57f288", "#6cd97e", "#82c075", "#97a76b", "#ad8d62", "#c27458", "#d85b4f", "#ed4245"
-    ];
+        '#57f288',
+        '#6cd97e',
+        '#82c075',
+        '#97a76b',
+        '#ad8d62',
+        '#c27458',
+        '#d85b4f',
+        '#ed4245',
+    ]
 
     let images = [
-        "https://media.discordapp.net/attachments/1063188671995596873/1063188684586893372/uploads.png",
-        "https://media.discordapp.net/attachments/1063188671995596873/1063188791084449792/uploads.png",
-        "https://media.discordapp.net/attachments/1063188671995596873/1063188819475709952/uploads.png",
-        "https://media.discordapp.net/attachments/1063188671995596873/1063188849657921577/uploads.png",
-        "https://media.discordapp.net/attachments/1063188671995596873/1063188878460211261/uploads.png",
-        "https://media.discordapp.net/attachments/1063188671995596873/1063188908436901988/uploads.png",
-        "https://media.discordapp.net/attachments/1063188671995596873/1063188934605148272/uploads.png",
-        "https://media.discordapp.net/attachments/1063188671995596873/1063188965613645964/uploads.png"
-    ];
+        'https://media.discordapp.net/attachments/1063188671995596873/1063188684586893372/uploads.png',
+        'https://media.discordapp.net/attachments/1063188671995596873/1063188791084449792/uploads.png',
+        'https://media.discordapp.net/attachments/1063188671995596873/1063188819475709952/uploads.png',
+        'https://media.discordapp.net/attachments/1063188671995596873/1063188849657921577/uploads.png',
+        'https://media.discordapp.net/attachments/1063188671995596873/1063188878460211261/uploads.png',
+        'https://media.discordapp.net/attachments/1063188671995596873/1063188908436901988/uploads.png',
+        'https://media.discordapp.net/attachments/1063188671995596873/1063188934605148272/uploads.png',
+        'https://media.discordapp.net/attachments/1063188671995596873/1063188965613645964/uploads.png',
+    ]
 
-    embed.setColor(colors[failCounter])
+    embed
+        .setColor(colors[failCounter])
         .setFields(
-            { name: "Mot à trouver", value: displayedArray.join(" "), inline: false },
-            { name: "Attention", value: `Lettres utilisées : ${usedItems.letters.join(", ")}\nMots proposés : ${usedItems.words.join(", ")}`, inline: false }
+            {
+                name: 'Mot à trouver',
+                value: displayedArray.join(' '),
+                inline: false,
+            },
+            {
+                name: 'Attention',
+                value: `Lettres utilisées : ${usedItems.letters.join(
+                    ', '
+                )}\nMots proposés : ${usedItems.words.join(', ')}`,
+                inline: false,
+            }
         )
-        .setImage(images[failCounter]);
-    
-    return embed;    
+        .setImage(images[failCounter])
+
+    return embed
 }
 
 // Main function
-async function game(message, toFindArray, displayedArray, usedItems, failCounter, embed) {
-    let filter = () => true;
-    let isWin = false;
-    let isFail = false;
+async function game(
+    message,
+    toFindArray,
+    displayedArray,
+    usedItems,
+    failCounter,
+    embed
+) {
+    let filter = () => true
+    let isWin = false
+    let isFail = false
 
     // Create a collector in the thread to collect the next message from a user
-    let collector;
+    let collector
     try {
-        collector = message.channel.createMessageCollector({ filter, max: 1, time: 300000, errors: ["time"] });
+        collector = message.channel.createMessageCollector({
+            filter,
+            max: 1,
+            time: 300000,
+            errors: ['time'],
+        })
     } catch (error) {
-        return;    
+        console.error(error)
+        console.error("[COMMANDS] - Pendu: Can't create a thread's messages collector.")
+        return
     }
 
-    // When triggered 
-    collector.on('collect', async m => {
-        let input = m.content;
+    // When triggered
+    collector.on('collect', async (m) => {
+        let input = m.content
 
         // Check if the message if a letter or a word (or sentence)
         if (input.length == 1) {
             // If the letter isn't already used and it's a valid letter and update the game
-            if (!await usedItems.letters.includes(input.toLowerCase()) && await input.match(/[a-z]/i)) {
-                if (isLetterInWord(toFindArray, input)) 
-                    displayedArray = await discoverLetter(toFindArray, displayedArray, input);
-                else
-                    failCounter++;
-                await usedItems.letters.push(input.toLowerCase());
+            if (
+                !(await usedItems.letters.includes(input.toLowerCase())) &&
+                (await input.match(/[a-z]/i))
+            ) {
+                if (isLetterInWord(toFindArray, input))
+                    displayedArray = await discoverLetter(
+                        toFindArray,
+                        displayedArray,
+                        input
+                    )
+                else failCounter++
+                await usedItems.letters.push(input.toLowerCase())
             }
         } else {
             // If the entry is not already used update the game
-            input = await input.replaceAll(" ", " ");
+            input = await input.replaceAll(' ', ' ')
             if (!usedItems.words.includes(input)) {
-                if (input.toLowerCase() === await toFindArray.join('').toLowerCase()) {
-                    displayedArray = toFindArray;
-                    isWin = true;
+                if (
+                    input.toLowerCase() ===
+                    (await toFindArray.join('').toLowerCase())
+                ) {
+                    displayedArray = toFindArray
+                    isWin = true
                 } else {
-                    await usedItems.words.push(input);
-                    failCounter++;
+                    await usedItems.words.push(input)
+                    failCounter++
                 }
             }
         }
 
         // Check if the game is finished or not
         if (await compareArrays(displayedArray, toFindArray)) {
-            isWin = true;
-            await embed.setDescription(`Jeu de pendu terminé, **bravo** 👏`);
+            isWin = true
+            await embed.setDescription(`Jeu de pendu terminé, **bravo** 👏`)
         } else if (failCounter == 7) {
-            isFail = true;
-            await embed.setDescription(`Jeu du pendu terminé, **dommage** 😦`);
-            displayedArray = toFindArray;
+            isFail = true
+            await embed.setDescription(`Jeu du pendu terminé, **dommage** 😦`)
+            displayedArray = toFindArray
         }
 
         // Delete the proposition message of the user
         try {
-            await m.delete();
+            await m.delete()
         } catch (error) {
-            
+            console.error(error)
         }
 
         // Update the game message
-        embed = await updateEmbed(embed, failCounter, displayedArray, usedItems);
+        embed = await updateEmbed(embed, failCounter, displayedArray, usedItems)
         try {
-            await message.edit({ embeds: [embed] });    
+            await message.edit({ embeds: [embed] })
         } catch (error) {
-            return;
+            console.error(error)
+            return
         }
 
         // Next phase of the game if not finished
         if (!isWin && !isFail)
-            game(message, toFindArray, displayedArray, usedItems, failCounter, embed);
+            game(
+                message,
+                toFindArray,
+                displayedArray,
+                usedItems,
+                failCounter,
+                embed
+            )
         else {
-            let thread = message.channel;
-            let name = thread.name;
-            await thread.setName(name.slice(0, -10) + "(terminée)").catch((r) => r);
-            await thread.setLocked(true).catch((r) => r);
-            await thread.setArchived(true).catch((r) => r);
+            let thread = message.channel
+            let name = thread.name
+            await thread
+                .setName(name.slice(0, -10) + '(terminée)')
+                .catch((r) => r)
+            await thread.setLocked(true).catch((r) => r)
+            await thread.setArchived(true).catch((r) => r)
         }
-    });
+    })
 
     // If the collector runs out of time the game is lost
     collector.on('end', async (collected, reason) => {
-        if (reason === "time") {
-            await embed.setDescription(`Jeu du pendu terminé, **dommage** 😦`);
-            displayedArray = toFindArray;
-            embed = await  updateEmbed(embed, failCounter, displayedArray, usedItems);
+        if (reason === 'time') {
+            await embed.setDescription(`Jeu du pendu terminé, **dommage** 😦`)
+            displayedArray = toFindArray
+            embed = await updateEmbed(
+                embed,
+                failCounter,
+                displayedArray,
+                usedItems
+            )
             try {
-                await message.edit({ embeds: [embed] });
+                await message.edit({ embeds: [embed] })
             } catch (error) {
-                
+                console.error(error)
             }
-            let thread = message.channel;
-            let name = thread.name;
-            await thread.setName(name.slice(0, -10) + "(terminée)").catch((r) => r);
-            await thread.setLocked(true).catch((r) => r);
-            await thread.setArchived(true).catch((r) => r);
+            let thread = message.channel
+            let name = thread.name
+            await thread
+                .setName(name.slice(0, -10) + '(terminée)')
+                .catch((r) => r)
+            await thread.setLocked(true).catch((r) => r)
+            await thread.setArchived(true).catch((r) => r)
         }
-    });
+    })
 }
