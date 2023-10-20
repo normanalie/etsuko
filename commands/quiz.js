@@ -7,12 +7,15 @@ const {
     Colors,
 } = require('discord.js')
 const axios = require('axios')
+const { shuffleArray } = require('../misc/shuffleArray')
 
 async function getQuiz() {
     const apiResponse = await axios.get(
         'https://api.openquizzdb.org/?key=4673C3S8Q8&choice=4&anec=1'
     )
-    return apiResponse.data.results[0]
+    const data = apiResponse.data.results[0]
+    data.autres_choix = shuffleArray(data.autres_choix)
+    return data
 }
 
 function buildButtons(choices) {
@@ -73,7 +76,6 @@ function buildCorrectMessage(quiz, user) {
 
 function buildWrongMessage(quiz, user) {
     const message = buildQuestionMessage(quiz)
-    console.log(message.embeds[0])
     const embed = EmbedBuilder.from(message.embeds[0])
         .setColor(Colors.Red)
         .addFields({ name: '\u200B', value: '\u200B' })
