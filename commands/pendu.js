@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { compareArrays } = require('../functions.js')
-const { dictionaire } = require("../asset/db_word.js")
-const wait = require('node:timers/promises').setTimeout
+const { dictionaire } = require('../asset/db_word.js')
+const { randomInt } = require('../misc/randomInt.js')
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,16 +22,14 @@ module.exports = {
         }
 
         // Get the prompt for the game
-        
-
         let toFind = interaction.options.getString('prompt')
-        
+
         // easter egg
-        if (toFind == "bob") toFind = dictionaire[toFind]
-        
+        if (toFind == 'bob') toFind = dictionaire[toFind]
+
         // if not word option
         if (!toFind) toFind = getRandomWord()
-        
+
         let thread
 
         // Try to create a thread for the current game
@@ -39,7 +37,7 @@ module.exports = {
             if (!interaction.channel.threads) {
                 try {
                     await interaction.deleteReply()
-                    console.log("[COMMANDS] - Pendu: No thread.")
+                    console.log('[COMMANDS] - Pendu: No thread.')
                 } catch (error) {
                     console.error(error)
                 }
@@ -51,7 +49,7 @@ module.exports = {
             })
         } catch (error) {
             console.error(error)
-            console.error("[COMMANDS] - Pendu: Error during thread creation.")
+            console.error('[COMMANDS] - Pendu: Error during thread creation.')
             try {
                 await interaction.deleteReply()
             } catch (error) {
@@ -106,26 +104,20 @@ module.exports = {
             })
         } catch (error) {
             console.error(error)
-            console.error("[COMMANDS] - Pendu: Can't send message in the thread.")
+            console.error(
+                "[COMMANDS] - Pendu: Can't send message in the thread."
+            )
         }
     },
 }
 
-
 // return a random word of a random size (Hard mode)
-function getRandomWord(){
-    let word_size = getRandom(3,13);
+function getRandomWord() {
+    let word_size = randomInt(3, 13)
     let nb_word = dictionaire[String(word_size)].length
 
-    return dictionaire[String(word_size)][getRandom(0 , nb_word)].toUpperCase();
+    return dictionaire[String(word_size)][randomInt(0, nb_word)].toUpperCase()
 }
-
-
-// return a random number between [min ; max] 
-function getRandom(min, max) {
-	return Math.floor(Math.random() * (max - min)) + min;
-}
-
 
 // Returns an array representing the start of the game
 function initDisplayArray(toFindArray) {
@@ -242,7 +234,9 @@ async function game(
         })
     } catch (error) {
         console.error(error)
-        console.error("[COMMANDS] - Pendu: Can't create a thread's messages collector.")
+        console.error(
+            "[COMMANDS] - Pendu: Can't create a thread's messages collector."
+        )
         return
     }
 
