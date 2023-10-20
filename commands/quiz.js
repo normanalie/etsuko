@@ -10,6 +10,83 @@ const axios = require('axios')
 const { shuffleArray } = require('../misc/shuffleArray')
 const { inThread } = require('../misc/inThread')
 
+const quizCategories = [
+    { name: 'TV/Cinéma', value: 'tv_cinema' },
+    { name: 'Art/Littérature', value: 'art_litterature' },
+    { name: 'Musique', value: 'musique' },
+    { name: 'Actu', value: 'actu_politique' },
+    { name: 'Culture Générale', value: 'culture_generale' },
+    { name: 'Sport', value: 'sport' },
+    { name: 'Jeux Vidéos', value: 'jeux_videos' },
+]
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('quiz')
+        .setDescription(
+            'Trouverez vous la réponse ?\u200BVous pouvez ajouter des questions sur https://quizzapi.jomoreschi.fr/'
+        )
+        .addStringOption((option) =>
+            option
+                .setName('category')
+                .setDescription('La catégories des questions')
+                .setRequired(false)
+                .addChoices(...quizCategories)
+        ),
+    async execute(interaction) {
+        try {
+            await interaction.deferReply({ fetchReply: true })
+            if (inThread(interaction)) {
+                console.log(
+                    '[COMMAND] - Quiz: Try to create a thread in a thread.'
+                )
+                interaction.deleteReply()
+                return
+            }
+            const thread = await interaction.channel.threads.create({
+                name: `Quiz de ${interaction.user.username}`,
+                autoArchiveDuration: 60,
+            })
+            interaction.deleteReply()
+            await gameLoop(interaction, thread)
+            thread.delete()
+        } catch (error) {
+            console.error(error)
+        }
+    },
+}
+
+async function gameLoop(interaction, thread) {
+    while (1) {
+        const quiz = await getQuiz(
+            interaction.options.getString('category') ?? ''
+        )
+        const questionMessage = await thread.send(buildQuestionMessage(quiz))
+        try {
+            const answer = await questionMessage.awaitMessageComponent({
+                time: 120000,
+            })
+            if (answer.customId == 'end') {
+                return
+            } else if (answer.customId == quiz.answer) {
+                answer.update(buildCorrectMessage(quiz, answer.user))
+            } else {
+                answer.update(buildWrongMessage(quiz, answer.user))
+            }
+        } catch (e) {
+            console.log('[COMMAND] - Quiz: User interaction to answer timeout.')
+            return
+        }
+    }
+}
+
+function getCategoryNameByValue(value) {
+    return (
+        quizCategories.find((category) => category.value === value)?.name ||
+        null
+    )
+}
+
 async function getQuiz(category) {
     const apiResponse = await axios.get(
         `https://quizzapi.jomoreschi.fr/api/v1/quiz?limit=1&category=${category}`
@@ -44,7 +121,9 @@ function buildQuestionMessage(data) {
         .setColor(0x418dc8)
         .setTitle(data.question)
         .setDescription(
-            `Catégorie: ${data.category} - Difficulté: ${data.difficulty}`
+            `Catégorie: ${getCategoryNameByValue(
+                data.category
+            )} - Difficulté: ${data.difficulty}`
         )
     return {
         embeds: [embed],
@@ -78,15 +157,12 @@ function buildCorrectMessage(quiz, user) {
         })
         .addFields({ name: '\u200B', value: '\u200B' })
         .setFooter({
-            text: 'Quiz fourni par [https://quizzapi.jomoreschi.fr/](https://quizzapi.jomoreschi.fr/)',
+            text: 'Quiz fourni par https://quizzapi.jomoreschi.fr/',
             iconURL:
                 'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
         })
     message.embeds = [embed]
-    message.components = [
-        disableButtons(message, quiz.answer),
-        buildEndButton(),
-    ]
+    message.components = [disableButtons(message, quiz.answer)]
     return message
 }
 
@@ -106,10 +182,7 @@ function buildWrongMessage(quiz, user) {
                 'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
         })
     message.embeds = [embed]
-    message.components = [
-        disableButtons(message, quiz.answer),
-        buildEndButton(),
-    ]
+    message.components = [disableButtons(message, quiz.answer)]
     return message
 }
 
@@ -121,72 +194,4 @@ function buildEndButton() {
         .setCustomId('end')
     row.addComponents(endButton)
     return row
-}
-
-async function gameLoop(interaction, thread) {
-    while (1) {
-        const quiz = await getQuiz(
-            interaction.options.getString('category') ?? ''
-        )
-        const questionMessage = await thread.send(buildQuestionMessage(quiz))
-        try {
-            const answer = await questionMessage.awaitMessageComponent({
-                time: 120000,
-            })
-            if (answer.customId == 'end') {
-                return
-            } else if (answer.customId == quiz.answer) {
-                answer.update(buildCorrectMessage(quiz, answer.user))
-            } else {
-                answer.update(buildWrongMessage(quiz, answer.user))
-            }
-        } catch (e) {
-            console.log('[COMMAND] - Quiz: User interaction to answer timeout.')
-            return
-        }
-    }
-}
-
-module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('quiz')
-        .setDescription(
-            'Trouverez vous la réponse ?\u200BVous pouvez ajouter des questions sur https://quizzapi.jomoreschi.fr/'
-        )
-        .addStringOption((option) =>
-            option
-                .setName('category')
-                .setDescription('La catégories des questions')
-                .setRequired(false)
-                .addChoices(
-                    { name: 'TV/Cinéma', value: 'tv_cinema' },
-                    { name: 'Art/Littérature', value: 'art_litterature' },
-                    { name: 'Musique', value: 'musique' },
-                    { name: 'Actu', value: 'actu_politique' },
-                    { name: 'Culture Générale', value: 'culture_generale' },
-                    { name: 'Sport', value: 'sport' },
-                    { name: 'Jeux Vidéos', value: 'jeux_videos' }
-                )
-        ),
-    async execute(interaction) {
-        try {
-            await interaction.deferReply({ fetchReply: true })
-            if (inThread(interaction)) {
-                console.log(
-                    '[COMMAND] - Quiz: Try to create a thread in a thread.'
-                )
-                interaction.deleteReply()
-                return
-            }
-            const thread = await interaction.channel.threads.create({
-                name: `Quiz de ${interaction.user.username}`,
-                autoArchiveDuration: 60,
-            })
-            interaction.deleteReply()
-            await gameLoop(interaction, thread)
-            thread.delete()
-        } catch (error) {
-            console.error(error)
-        }
-    },
 }
