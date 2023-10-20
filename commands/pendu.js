@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 const { compareArrays } = require('../functions.js')
+const { dictionaire } = require("../asset/db_word.js")
 const wait = require('node:timers/promises').setTimeout
 
 module.exports = {
@@ -10,7 +11,7 @@ module.exports = {
             option
                 .setName('prompt')
                 .setDescription('Ton mot ou ta phrase pour le pendu')
-                .setRequired(true)
+                .setRequired(false)
         ),
     async execute(interaction) {
         // Send message to inform that the command is starting
@@ -21,7 +22,16 @@ module.exports = {
         }
 
         // Get the prompt for the game
-        const toFind = interaction.options.getString('prompt')
+        
+
+        let toFind = interaction.options.getString('prompt')
+        
+        // easter egg
+        if (toFind == "bob") toFind = dictionaire[toFind]
+        
+        // if not word option
+        if (!toFind) toFind = getRandomWord()
+        
         let thread
 
         // Try to create a thread for the current game
@@ -100,6 +110,22 @@ module.exports = {
         }
     },
 }
+
+
+// return a random word of a random size (Hard mode)
+function getRandomWord(){
+    let word_size = getRandom(3,13);
+    let nb_word = dictionaire[String(word_size)].length
+
+    return dictionaire[String(word_size)][getRandom(0 , nb_word)].toUpperCase();
+}
+
+
+// return a random number between [min ; max] 
+function getRandom(min, max) {
+	return Math.floor(Math.random() * (max - min)) + min;
+}
+
 
 // Returns an array representing the start of the game
 function initDisplayArray(toFindArray) {
