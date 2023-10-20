@@ -77,6 +77,11 @@ function buildCorrectMessage(quiz, user) {
             value: `Bravo ${user}`,
         })
         .addFields({ name: '\u200B', value: '\u200B' })
+        .setFooter({
+            text: 'Quiz fourni par [https://quizzapi.jomoreschi.fr/](https://quizzapi.jomoreschi.fr/)',
+            iconURL:
+                'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
+        })
     message.embeds = [embed]
     message.components = [
         disableButtons(message, quiz.answer),
@@ -95,6 +100,11 @@ function buildWrongMessage(quiz, user) {
             value: `Dommage ${user}`,
         })
         .addFields({ name: '\u200B', value: '\u200B' })
+        .setFooter({
+            text: 'Quiz fourni par https://quizzapi.jomoreschi.fr/',
+            iconURL:
+                'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
+        })
     message.embeds = [embed]
     message.components = [
         disableButtons(message, quiz.answer),
@@ -119,11 +129,16 @@ async function gameLoop(interaction, thread) {
             interaction.options.getString('category') ?? ''
         )
         const questionMessage = await thread.send(buildQuestionMessage(quiz))
-        const answer = await questionMessage.awaitMessageComponent({
-            time: 60000,
-        })
+        try {
+            const answer = await questionMessage.awaitMessageComponent({
+                time: 120000,
+            })
+        } catch (e) {
+            console.log('[COMMAND] - Quiz: User interaction to answer timeout.')
+            return
+        }
+
         if (answer.customId == 'end') {
-            await thread.delete()
             return
         } else if (answer.customId == quiz.answer) {
             answer.update(buildCorrectMessage(quiz, answer.user))
@@ -136,7 +151,9 @@ async function gameLoop(interaction, thread) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quiz')
-        .setDescription('Trouverez vous la réponse ?')
+        .setDescription(
+            'Trouverez vous la réponse ?\u200BVous pouvez ajouter des questions sur https://quizzapi.jomoreschi.fr/'
+        )
         .addStringOption((option) =>
             option
                 .setName('category')
@@ -168,6 +185,7 @@ module.exports = {
             })
             interaction.deleteReply()
             await gameLoop(interaction, thread)
+            thread.delete()
         } catch (error) {
             console.error(error)
         }
