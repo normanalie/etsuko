@@ -8,6 +8,7 @@ const {
 } = require('discord.js')
 const axios = require('axios')
 const { shuffleArray } = require('../misc/shuffleArray')
+const { inThread } = require('../misc/inThread')
 
 async function getQuiz() {
     const apiResponse = await axios.get(
@@ -45,7 +46,10 @@ function buildQuestionMessage(data) {
         .setDescription(
             `Catégorie: ${data.category} - Difficulté: ${data.difficulty}`
         )
-    return { embeds: [embed], components: [buildButtons(data.answers)] }
+    return {
+        embeds: [embed],
+        components: [buildButtons(data.answers), buildEndButton()],
+    }
 }
 
 function disableButtons(message, correct_answer) {
@@ -74,7 +78,10 @@ function buildCorrectMessage(quiz, user) {
         })
         .addFields({ name: '\u200B', value: '\u200B' })
     message.embeds = [embed]
-    message.components = [disableButtons(message, quiz.answer)]
+    message.components = [
+        disableButtons(message, quiz.answer),
+        buildEndButton(),
+    ]
     return message
 }
 
@@ -89,8 +96,39 @@ function buildWrongMessage(quiz, user) {
         })
         .addFields({ name: '\u200B', value: '\u200B' })
     message.embeds = [embed]
-    message.components = [disableButtons(message, quiz.answer)]
+    message.components = [
+        disableButtons(message, quiz.answer),
+        buildEndButton(),
+    ]
     return message
+}
+
+function buildEndButton() {
+    const row = new ActionRowBuilder()
+    const endButton = new ButtonBuilder()
+        .setStyle(ButtonStyle.Danger)
+        .setLabel('Terminer')
+        .setCustomId('end')
+    row.addComponents(endButton)
+    return row
+}
+
+async function gameLoop(interaction, thread) {
+    while (1) {
+        const quiz = await getQuiz()
+        const questionMessage = await thread.send(buildQuestionMessage(quiz))
+        const answer = await questionMessage.awaitMessageComponent({
+            time: 60000,
+        })
+        if (answer.customId == 'end') {
+            await thread.delete()
+            return
+        } else if (answer.customId == quiz.answer) {
+            answer.update(buildCorrectMessage(quiz, answer.user))
+        } else {
+            answer.update(buildWrongMessage(quiz, answer.user))
+        }
+    }
 }
 
 module.exports = {
@@ -100,18 +138,19 @@ module.exports = {
     async execute(interaction) {
         try {
             await interaction.deferReply({ fetchReply: true })
-            const quiz = await getQuiz()
-            const questionMessage = await interaction.editReply(
-                buildQuestionMessage(quiz)
-            )
-            const answer = await questionMessage.awaitMessageComponent({
-                time: 60000,
-            })
-            if (answer.customId == quiz.answer) {
-                answer.update(buildCorrectMessage(quiz, answer.user))
-            } else {
-                answer.update(buildWrongMessage(quiz, answer.user))
+            if (inThread(interaction)) {
+                console.log(
+                    '[COMMAND] - Quiz: Try to create a thread in a thread.'
+                )
+                interaction.deleteReply()
+                return
             }
+            const thread = await interaction.channel.threads.create({
+                name: `Quiz de ${interaction.user.username}`,
+                autoArchiveDuration: 60,
+            })
+            interaction.deleteReply()
+            await gameLoop(interaction, thread)
         } catch (error) {
             console.error(error)
         }
