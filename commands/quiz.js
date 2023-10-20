@@ -133,17 +133,16 @@ async function gameLoop(interaction, thread) {
             const answer = await questionMessage.awaitMessageComponent({
                 time: 120000,
             })
+            if (answer.customId == 'end') {
+                return
+            } else if (answer.customId == quiz.answer) {
+                answer.update(buildCorrectMessage(quiz, answer.user))
+            } else {
+                answer.update(buildWrongMessage(quiz, answer.user))
+            }
         } catch (e) {
             console.log('[COMMAND] - Quiz: User interaction to answer timeout.')
             return
-        }
-
-        if (answer.customId == 'end') {
-            return
-        } else if (answer.customId == quiz.answer) {
-            answer.update(buildCorrectMessage(quiz, answer.user))
-        } else {
-            answer.update(buildWrongMessage(quiz, answer.user))
         }
     }
 }
