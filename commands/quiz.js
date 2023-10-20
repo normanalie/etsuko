@@ -7,12 +7,24 @@ const {
     Colors,
 } = require('discord.js')
 const axios = require('axios')
+const { shuffleArray } = require('../misc/shuffleArray')
+const { inThread } = require('../misc/inThread')
 
-async function getQuiz() {
+async function getQuiz(category) {
     const apiResponse = await axios.get(
-        'https://api.openquizzdb.org/?key=4673C3S8Q8&choice=4&anec=1'
+        `https://quizzapi.jomoreschi.fr/api/v1/quiz?limit=1&category=${category}`
     )
-    return apiResponse.data.results[0]
+    const data = apiResponse.data.quizzes[0]
+    const formated_data = {
+        question: data.question,
+        answer: data.answer,
+        answers: data.badAnswers,
+        category: data.category,
+        difficulty: data.difficulty,
+    }
+    formated_data.answers.push(formated_data.answer)
+    formated_data.answers = shuffleArray(formated_data.answers)
+    return formated_data
 }
 
 function buildButtons(choices) {
@@ -32,9 +44,12 @@ function buildQuestionMessage(data) {
         .setColor(0x418dc8)
         .setTitle(data.question)
         .setDescription(
-            `Catégorie: ${data.categorie} - Difficulté: ${data.difficulte}`
+            `Catégorie: ${data.category} - Difficulté: ${data.difficulty}`
         )
-    return { embeds: [embed], components: [buildButtons(data.autres_choix)] }
+    return {
+        embeds: [embed],
+        components: [buildButtons(data.answers), buildEndButton()],
+    }
 }
 
 function disableButtons(message, correct_answer) {
@@ -61,19 +76,22 @@ function buildCorrectMessage(quiz, user) {
             name: `Bonne réponse !`,
             value: `Bravo ${user}`,
         })
-        .addFields({
-            name: 'Anecdote',
-            value: quiz.anecdote,
-        })
         .addFields({ name: '\u200B', value: '\u200B' })
+        .setFooter({
+            text: 'Quiz fourni par [https://quizzapi.jomoreschi.fr/](https://quizzapi.jomoreschi.fr/)',
+            iconURL:
+                'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
+        })
     message.embeds = [embed]
-    message.components = [disableButtons(message, quiz.reponse_correcte)]
+    message.components = [
+        disableButtons(message, quiz.answer),
+        buildEndButton(),
+    ]
     return message
 }
 
 function buildWrongMessage(quiz, user) {
     const message = buildQuestionMessage(quiz)
-    console.log(message.embeds[0])
     const embed = EmbedBuilder.from(message.embeds[0])
         .setColor(Colors.Red)
         .addFields({ name: '\u200B', value: '\u200B' })
@@ -81,35 +99,92 @@ function buildWrongMessage(quiz, user) {
             name: `Mauvaise réponse.`,
             value: `Dommage ${user}`,
         })
-        .addFields({
-            name: 'Anecdote',
-            value: quiz.anecdote,
-        })
         .addFields({ name: '\u200B', value: '\u200B' })
+        .setFooter({
+            text: 'Quiz fourni par https://quizzapi.jomoreschi.fr/',
+            iconURL:
+                'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
+        })
     message.embeds = [embed]
-    message.components = [disableButtons(message, quiz.reponse_correcte)]
+    message.components = [
+        disableButtons(message, quiz.answer),
+        buildEndButton(),
+    ]
     return message
+}
+
+function buildEndButton() {
+    const row = new ActionRowBuilder()
+    const endButton = new ButtonBuilder()
+        .setStyle(ButtonStyle.Danger)
+        .setLabel('Terminer')
+        .setCustomId('end')
+    row.addComponents(endButton)
+    return row
+}
+
+async function gameLoop(interaction, thread) {
+    while (1) {
+        const quiz = await getQuiz(
+            interaction.options.getString('category') ?? ''
+        )
+        const questionMessage = await thread.send(buildQuestionMessage(quiz))
+        try {
+            const answer = await questionMessage.awaitMessageComponent({
+                time: 120000,
+            })
+            if (answer.customId == 'end') {
+                return
+            } else if (answer.customId == quiz.answer) {
+                answer.update(buildCorrectMessage(quiz, answer.user))
+            } else {
+                answer.update(buildWrongMessage(quiz, answer.user))
+            }
+        } catch (e) {
+            console.log('[COMMAND] - Quiz: User interaction to answer timeout.')
+            return
+        }
+    }
 }
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quiz')
-        .setDescription('Trouverez vous la réponse ?'),
+        .setDescription(
+            'Trouverez vous la réponse ?\u200BVous pouvez ajouter des questions sur https://quizzapi.jomoreschi.fr/'
+        )
+        .addStringOption((option) =>
+            option
+                .setName('category')
+                .setDescription('La catégories des questions')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'TV/Cinéma', value: 'tv_cinema' },
+                    { name: 'Art/Littérature', value: 'art_litterature' },
+                    { name: 'Musique', value: 'musique' },
+                    { name: 'Actu', value: 'actu_politique' },
+                    { name: 'Culture Générale', value: 'culture_generale' },
+                    { name: 'Sport', value: 'sport' },
+                    { name: 'Jeux Vidéos', value: 'jeux_videos' }
+                )
+        ),
     async execute(interaction) {
         try {
             await interaction.deferReply({ fetchReply: true })
-            const quiz = await getQuiz()
-            const questionMessage = await interaction.editReply(
-                buildQuestionMessage(quiz)
-            )
-            const answer = await questionMessage.awaitMessageComponent({
-                time: 60000,
-            })
-            if (answer.customId == quiz.reponse_correcte) {
-                answer.update(buildCorrectMessage(quiz, answer.user))
-            } else {
-                answer.update(buildWrongMessage(quiz, answer.user))
+            if (inThread(interaction)) {
+                console.log(
+                    '[COMMAND] - Quiz: Try to create a thread in a thread.'
+                )
+                interaction.deleteReply()
+                return
             }
+            const thread = await interaction.channel.threads.create({
+                name: `Quiz de ${interaction.user.username}`,
+                autoArchiveDuration: 60,
+            })
+            interaction.deleteReply()
+            await gameLoop(interaction, thread)
+            thread.delete()
         } catch (error) {
             console.error(error)
         }
