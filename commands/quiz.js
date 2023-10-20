@@ -10,9 +10,9 @@ const axios = require('axios')
 const { shuffleArray } = require('../misc/shuffleArray')
 const { inThread } = require('../misc/inThread')
 
-async function getQuiz() {
+async function getQuiz(category) {
     const apiResponse = await axios.get(
-        'https://quizzapi.jomoreschi.fr/api/v1/quiz?limit=1'
+        `https://quizzapi.jomoreschi.fr/api/v1/quiz?limit=1&category=${category}`
     )
     const data = apiResponse.data.quizzes[0]
     const formated_data = {
@@ -115,7 +115,9 @@ function buildEndButton() {
 
 async function gameLoop(interaction, thread) {
     while (1) {
-        const quiz = await getQuiz()
+        const quiz = await getQuiz(
+            interaction.options.getString('category') ?? ''
+        )
         const questionMessage = await thread.send(buildQuestionMessage(quiz))
         const answer = await questionMessage.awaitMessageComponent({
             time: 60000,
@@ -134,7 +136,22 @@ async function gameLoop(interaction, thread) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quiz')
-        .setDescription('Trouverez vous la réponse ?'),
+        .setDescription('Trouverez vous la réponse ?')
+        .addStringOption((option) =>
+            option
+                .setName('category')
+                .setDescription('La catégories des questions')
+                .setRequired(false)
+                .addChoices(
+                    { name: 'TV/Cinéma', value: 'tv_cinema' },
+                    { name: 'Art/Littérature', value: 'art_litterature' },
+                    { name: 'Musique', value: 'musique' },
+                    { name: 'Actu', value: 'actu_politique' },
+                    { name: 'Culture Générale', value: 'culture_generale' },
+                    { name: 'Sport', value: 'sport' },
+                    { name: 'Jeux Vidéos', value: 'jeux_videos' }
+                )
+        ),
     async execute(interaction) {
         try {
             await interaction.deferReply({ fetchReply: true })
