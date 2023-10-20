@@ -11,11 +11,19 @@ const { shuffleArray } = require('../misc/shuffleArray')
 
 async function getQuiz() {
     const apiResponse = await axios.get(
-        'https://api.openquizzdb.org/?key=4673C3S8Q8&choice=4&anec=1'
+        'https://quizzapi.jomoreschi.fr/api/v1/quiz?limit=1'
     )
-    const data = apiResponse.data.results[0]
-    data.autres_choix = shuffleArray(data.autres_choix)
-    return data
+    const data = apiResponse.data.quizzes[0]
+    const formated_data = {
+        question: data.question,
+        answer: data.answer,
+        answers: data.badAnswers,
+        category: data.category,
+        difficulty: data.difficulty,
+    }
+    formated_data.answers.push(formated_data.answer)
+    formated_data.answers = shuffleArray(formated_data.answers)
+    return formated_data
 }
 
 function buildButtons(choices) {
@@ -35,9 +43,9 @@ function buildQuestionMessage(data) {
         .setColor(0x418dc8)
         .setTitle(data.question)
         .setDescription(
-            `Catégorie: ${data.categorie} - Difficulté: ${data.difficulte}`
+            `Catégorie: ${data.category} - Difficulté: ${data.difficulty}`
         )
-    return { embeds: [embed], components: [buildButtons(data.autres_choix)] }
+    return { embeds: [embed], components: [buildButtons(data.answers)] }
 }
 
 function disableButtons(message, correct_answer) {
@@ -64,13 +72,9 @@ function buildCorrectMessage(quiz, user) {
             name: `Bonne réponse !`,
             value: `Bravo ${user}`,
         })
-        .addFields({
-            name: 'Anecdote',
-            value: quiz.anecdote,
-        })
         .addFields({ name: '\u200B', value: '\u200B' })
     message.embeds = [embed]
-    message.components = [disableButtons(message, quiz.reponse_correcte)]
+    message.components = [disableButtons(message, quiz.answer)]
     return message
 }
 
@@ -83,13 +87,9 @@ function buildWrongMessage(quiz, user) {
             name: `Mauvaise réponse.`,
             value: `Dommage ${user}`,
         })
-        .addFields({
-            name: 'Anecdote',
-            value: quiz.anecdote,
-        })
         .addFields({ name: '\u200B', value: '\u200B' })
     message.embeds = [embed]
-    message.components = [disableButtons(message, quiz.reponse_correcte)]
+    message.components = [disableButtons(message, quiz.answer)]
     return message
 }
 
@@ -107,7 +107,7 @@ module.exports = {
             const answer = await questionMessage.awaitMessageComponent({
                 time: 60000,
             })
-            if (answer.customId == quiz.reponse_correcte) {
+            if (answer.customId == quiz.answer) {
                 answer.update(buildCorrectMessage(quiz, answer.user))
             } else {
                 answer.update(buildWrongMessage(quiz, answer.user))
