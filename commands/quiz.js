@@ -93,6 +93,7 @@ async function getQuiz(category) {
     )
     const data = apiResponse.data.quizzes[0]
     const formated_data = {
+        id: data._id,
         question: data.question,
         answer: data.answer,
         answers: data.badAnswers,
@@ -125,6 +126,12 @@ function buildQuestionMessage(data) {
                 data.category
             )} - Difficulté: ${data.difficulty}`
         )
+        .setFooter({
+            text: `Quiz fourni par https://quizzapi.jomoreschi.fr/  -  ID: ${data.id}`,
+            iconURL:
+                'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
+        })
+        .setURL('https://quizzapi.jomoreschi.fr/')
     return {
         embeds: [embed],
         components: [buildButtons(data.answers), buildEndButton()],
@@ -157,10 +164,11 @@ function buildCorrectMessage(quiz, user) {
         })
         .addFields({ name: '\u200B', value: '\u200B' })
         .setFooter({
-            text: 'Quiz fourni par https://quizzapi.jomoreschi.fr/',
+            text: `Quiz fourni par https://quizzapi.jomoreschi.fr/  -  ID: ${data.id}`,
             iconURL:
                 'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
         })
+        .setURL('https://quizzapi.jomoreschi.fr/')
     message.embeds = [embed]
     message.components = [disableButtons(message, quiz.answer)]
     return message
@@ -177,10 +185,11 @@ function buildWrongMessage(quiz, user) {
         })
         .addFields({ name: '\u200B', value: '\u200B' })
         .setFooter({
-            text: 'Quiz fourni par https://quizzapi.jomoreschi.fr/',
+            text: `Quiz fourni par https://quizzapi.jomoreschi.fr/  -  ID: ${data.id}`,
             iconURL:
                 'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
         })
+        .setURL('https://quizzapi.jomoreschi.fr/')
     message.embeds = [embed]
     message.components = [disableButtons(message, quiz.answer)]
     return message
