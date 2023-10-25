@@ -76,12 +76,18 @@ async function gameLoop(interaction, thread) {
                 if (!(answer.user.username in scores)) {
                     scores[answer.user.username] = 0
                 }
-                answer.update(buildWrongMessage(quiz, answer.user, scores))
+                answer.update(
+                    buildWrongMessage(
+                        quiz,
+                        answer.user,
+                        answer.customId,
+                        scores
+                    )
+                )
             }
-            console.log(scores)
         } catch (e) {
-            console.log('[COMMAND] - Quiz: User interaction to answer timeout.')
-            console.log(e)
+            console.error('[COMMAND] - Quiz: Error in game loop.')
+            console.error(e)
             return
         }
     }
@@ -161,14 +167,19 @@ function buildQuestionMessage(data) {
     }
 }
 
-function disableButtons(message, correct_answer) {
+function disableButtons(message, correct_answer, user_answer) {
     const row = new ActionRowBuilder()
     const buttons = message.components[0].components
     buttons.forEach((button) => {
+        button.setStyle(ButtonStyle.Secondary)
         if (button.data.custom_id == correct_answer) {
             button.setStyle(ButtonStyle.Success)
-        } else {
-            button.setStyle(ButtonStyle.Secondary)
+        }
+        if (
+            button.data.custom_id == user_answer &&
+            correct_answer != user_answer
+        ) {
+            button.setStyle(ButtonStyle.Danger)
         }
         button.setDisabled(true)
         row.addComponents(button)
@@ -197,11 +208,11 @@ function buildCorrectMessage(quiz, user, scores) {
         })
         .setURL('https://quizzapi.jomoreschi.fr/')
     message.embeds = [embed]
-    message.components = [disableButtons(message, quiz.answer)]
+    message.components = [disableButtons(message, quiz.answer, quiz.answer)]
     return message
 }
 
-function buildWrongMessage(quiz, user, scores) {
+function buildWrongMessage(quiz, user, user_answer, scores) {
     const message = buildQuestionMessage(quiz)
     const embed = EmbedBuilder.from(message.embeds[0])
         .setColor(Colors.Red)
@@ -222,7 +233,7 @@ function buildWrongMessage(quiz, user, scores) {
         })
         .setURL('https://quizzapi.jomoreschi.fr/')
     message.embeds = [embed]
-    message.components = [disableButtons(message, quiz.answer)]
+    message.components = [disableButtons(message, quiz.answer, user_answer)]
     return message
 }
 
