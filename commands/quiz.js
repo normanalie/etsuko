@@ -104,7 +104,7 @@ function formatScores(scores) {
     let string = ''
     Object.entries(scores).forEach((entry) => {
         const [username, score] = entry
-        string += `${username}: ${score}`
+        string += `${username}: ${score}\n`
     })
     return string
 }
