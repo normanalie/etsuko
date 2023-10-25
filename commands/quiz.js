@@ -57,6 +57,7 @@ module.exports = {
 }
 
 async function gameLoop(interaction, thread) {
+    let scores = {}
     while (1) {
         const quiz = await getQuiz(
             interaction.options.getString('category') ?? ''
@@ -69,15 +70,37 @@ async function gameLoop(interaction, thread) {
             if (answer.customId == 'end') {
                 return
             } else if (answer.customId == quiz.answer) {
-                answer.update(buildCorrectMessage(quiz, answer.user))
+                scores = incrementScores(scores, answer.user.username)
+                answer.update(buildCorrectMessage(quiz, answer.user, scores))
             } else {
-                answer.update(buildWrongMessage(quiz, answer.user))
+                if (!(answer.user.username in scores)) {
+                    scores[answer.user.username] = 0
+                }
+                answer.update(buildWrongMessage(quiz, answer.user, scores))
             }
+            console.log(scores)
         } catch (e) {
             console.log('[COMMAND] - Quiz: User interaction to answer timeout.')
+            console.log(e)
             return
         }
     }
+}
+
+function incrementScores(scores, username) {
+    if (isNaN((scores[username] += 1))) {
+        scores[username] = 1
+    }
+    return scores
+}
+
+function formatScores(scores) {
+    let string = ''
+    Object.entries(scores).forEach((entry) => {
+        const [username, score] = entry
+        string += `${username}: ${score}`
+    })
+    return string
 }
 
 function getCategoryNameByValue(value) {
@@ -153,7 +176,7 @@ function disableButtons(message, correct_answer) {
     return row
 }
 
-function buildCorrectMessage(quiz, user) {
+function buildCorrectMessage(quiz, user, scores) {
     const message = buildQuestionMessage(quiz)
     const embed = EmbedBuilder.from(message.embeds[0])
         .setColor(Colors.Green)
@@ -162,9 +185,13 @@ function buildCorrectMessage(quiz, user) {
             name: `Bonne réponse !`,
             value: `Bravo ${user}`,
         })
+        .addFields({
+            name: `Scores`,
+            value: `${formatScores(scores)}`,
+        })
         .addFields({ name: '\u200B', value: '\u200B' })
         .setFooter({
-            text: `Quiz fourni par https://quizzapi.jomoreschi.fr/  -  ID: ${data.id}`,
+            text: `Quiz fourni par https://quizzapi.jomoreschi.fr/  -  ID: ${quiz.id}`,
             iconURL:
                 'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
         })
@@ -174,7 +201,7 @@ function buildCorrectMessage(quiz, user) {
     return message
 }
 
-function buildWrongMessage(quiz, user) {
+function buildWrongMessage(quiz, user, scores) {
     const message = buildQuestionMessage(quiz)
     const embed = EmbedBuilder.from(message.embeds[0])
         .setColor(Colors.Red)
@@ -183,9 +210,13 @@ function buildWrongMessage(quiz, user) {
             name: `Mauvaise réponse.`,
             value: `Dommage ${user}`,
         })
+        .addFields({
+            name: `Scores`,
+            value: `${formatScores(scores)}`,
+        })
         .addFields({ name: '\u200B', value: '\u200B' })
         .setFooter({
-            text: `Quiz fourni par https://quizzapi.jomoreschi.fr/  -  ID: ${data.id}`,
+            text: `Quiz fourni par https://quizzapi.jomoreschi.fr/  -  ID: ${quiz.id}`,
             iconURL:
                 'https://avatars.githubusercontent.com/u/88693358?s=48&v=4',
         })
