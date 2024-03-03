@@ -11,6 +11,7 @@ const path = require('path')
 
 const { handleSlashCommand } = require('./handlers/commands')
 const { addReactions } = require('./handlers/messages')
+const { newMemberWelcome, handleWelcome } = require('./handlers/welcome')
 
 const Etudiants = {
     CPI1: 0,
@@ -59,6 +60,45 @@ client.on('ready', () => {
     console.log(
         `\n\x1b[32m🚀 I am now online, my name is ${client.user.username}\x1b[0m`
     )
+    
+    handleWelcome(client)
+})
+
+client.on('guildMemberAdd', async (member) => {
+    console.log('Guild member add')
+    await newMemberWelcome(member)
+})
+
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isButton()) return
+
+    const role_name = interaction.customId.substring(5)
+    const role = interaction.guild.roles.cache.find(
+        (role) => role.name == role_name
+    )
+
+    if (!role) {
+        await interaction.reply({
+            content: `Le role ${role} n'existe pas sur ce serveur.`,
+            ephemeral: true,
+        })
+        return
+    }
+
+    try {
+        await interaction.member.roles.add(role)
+        await interaction.reply({
+            content: `Le role ${role_name} à été ajouté à ${interaction.member}`,
+            ephemeral: true,
+        })
+    } catch (error) {
+        console.error(error)
+        await interaction.reply({
+            content:
+                "Le bot n'a pas les autorisations necessaires pour gerer les roles.",
+            ephemeral: true,
+        })
+    }
 })
 
 client.on(Events.InteractionCreate, async (interaction) => {
