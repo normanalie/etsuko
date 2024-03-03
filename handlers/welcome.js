@@ -1,4 +1,4 @@
-const { getTrackedMessage } = require('../misc/trackedMessages')
+const { getTrackedMessage, getPrograms } = require('../misc/database')
 const {
     ActionRowBuilder,
     EmbedBuilder,
@@ -9,6 +9,10 @@ const {
 
 async function handleWelcome(client) {
     const welcomeMessage = await getTrackedMessage(client, 'welcome')
+    if (welcomeMessage == null) {
+        console.log('No welcome message. Please use /initWelcome')
+        return
+    }
 
     const collector = welcomeMessage.createMessageComponentCollector({
         componentType: ComponentType.StringSelect,
@@ -21,8 +25,26 @@ async function handleWelcome(client) {
     })
 }
 
-async function newMemberWelcome(member) {
-    const channel = member.guild.systemChannel
+async function buildActionRow() {
+    const programs = await getPrograms()
+    const programSelect = new StringSelectMenuBuilder()
+        .setCustomId('program')
+        .setPlaceholder('Votre filière ?')
+    programs.forEach((program) => {
+        const optionBuilder = new StringSelectMenuOptionBuilder()
+            .setLabel(program.displayname)
+            .setValue(program.name)
+
+        if (program.desc !== null && program.desc.length >= 1) {
+            optionBuilder.setDescription(program.desc)
+        }
+
+        programSelect.addOptions(optionBuilder)
+    })
+    return new ActionRowBuilder().addComponents(programSelect)
+}
+
+async function sendWelcomeMessage(channel) {
     if (!channel) return
 
     const embed = new EmbedBuilder()
@@ -30,7 +52,7 @@ async function newMemberWelcome(member) {
             name: 'Etsuko',
             url: 'https://github.com/normanalie/etsuko',
         })
-        .setTitle(`Bienvenue ${member.displayName} sur le serveur.`)
+        .setTitle(`Bienvenue sur le serveur **Tous les ISTY**`)
         .setDescription('Blablabla')
         .addFields(
             {
@@ -46,33 +68,13 @@ async function newMemberWelcome(member) {
         )
         .setColor('#d58800')
 
-    const programSelect = new StringSelectMenuBuilder()
-        .setCustomId('program')
-        .setPlaceholder('Votre filière ?')
-        .addOptions(
-            new StringSelectMenuOptionBuilder()
-                .setLabel('CPI1')
-                .setValue('cpi1'),
-            new StringSelectMenuOptionBuilder()
-                .setLabel('CPI2')
-                .setValue('cpi2'),
-            new StringSelectMenuOptionBuilder()
-                .setLabel('IATIC3')
-                .setValue('iatic3'),
-            new StringSelectMenuOptionBuilder()
-                .setLabel('IATIC4')
-                .setValue('iatic4'),
-            new StringSelectMenuOptionBuilder()
-                .setLabel('IATIC5')
-                .setValue('iatic5')
-        )
-    const row = new ActionRowBuilder().addComponents(programSelect)
+    const row = await buildActionRow()
 
-    const response = await channel.send({
+    channel.send({
         embeds: [embed],
         components: [row],
     })
 }
 
-exports.newMemberWelcome = newMemberWelcome
+exports.sendWelcomeMessage = sendWelcomeMessage
 exports.handleWelcome = handleWelcome

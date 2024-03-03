@@ -24,7 +24,27 @@ async function getTrackedMessage(client, id) {
             'Erreur lors de la récupération du message de bienvenue :',
             error
         )
+        return null
+    }
+}
+
+async function getPrograms() {
+    try {
+        const { data, error } = await supabase.from('programs').select()
+
+        if (error) {
+            throw new Error(error.message)
+        }
+
+        if (data && data.length > 0) {
+            return data
+        } else {
+            throw new Error("Aucune filière n'a été trouvée")
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des filières :', error)
     }
 }
 
 exports.getTrackedMessage = getTrackedMessage
+exports.getPrograms = getPrograms

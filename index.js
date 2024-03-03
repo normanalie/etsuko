@@ -60,6 +60,7 @@ client.on('ready', () => {
     console.log(
         `\n\x1b[32m🚀 I am now online, my name is ${client.user.username}\x1b[0m`
     )
+    
     handleWelcome(client)
 })
 
