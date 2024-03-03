@@ -1,4 +1,8 @@
-const { getTrackedMessage, getPrograms } = require('../misc/database')
+const {
+    getTrackedMessage,
+    getPrograms,
+    setTrackedMessage,
+} = require('../misc/database')
 const {
     ActionRowBuilder,
     EmbedBuilder,
@@ -13,7 +17,15 @@ async function handleWelcome(client) {
         console.log('No welcome message. Please use /initWelcome')
         return
     }
+    setCollector(welcomeMessage)
+}
 
+let currentCollector = null
+function setCollector(welcomeMessage) {
+    if (currentCollector) {
+        console.log('Stopped collector')
+        currentCollector.stop()
+    }
     const collector = welcomeMessage.createMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         time: 3_600_000,
@@ -23,6 +35,7 @@ async function handleWelcome(client) {
         const selection = i.values[0]
         await i.reply(`${i.user} has selected ${selection}!`)
     })
+    currentCollector = collector
 }
 
 async function buildActionRow() {
@@ -70,10 +83,12 @@ async function sendWelcomeMessage(channel) {
 
     const row = await buildActionRow()
 
-    channel.send({
+    const message = await channel.send({
         embeds: [embed],
         components: [row],
     })
+    await setTrackedMessage('welcome', message.channelId, message.id)
+    setCollector(message)
 }
 
 exports.sendWelcomeMessage = sendWelcomeMessage

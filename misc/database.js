@@ -28,6 +28,27 @@ async function getTrackedMessage(client, id) {
     }
 }
 
+async function setTrackedMessage(id, channelId, messageId) {
+    try {
+        const { data, error } = await supabase
+            .from('trackedMessages')
+            .upsert({ id: id, channelId: channelId, messageId: messageId })
+            .select()
+        if (error) {
+            throw new Error(error.message)
+        }
+
+        if (data && data.length > 0) {
+            return data[0]
+        } else {
+            throw new Error("Aucun message n'a été trouvé.")
+        }
+    } catch (error) {
+        console.error("Erreur lors de l'enregistrement du message", error)
+        return null
+    }
+}
+
 async function getPrograms() {
     try {
         const { data, error } = await supabase.from('programs').select()
@@ -48,3 +69,4 @@ async function getPrograms() {
 
 exports.getTrackedMessage = getTrackedMessage
 exports.getPrograms = getPrograms
+exports.setTrackedMessage = setTrackedMessage
