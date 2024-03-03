@@ -51,7 +51,42 @@ async function setTrackedMessage(id, channelId, messageId) {
 
 async function getPrograms() {
     try {
-        const { data, error } = await supabase.from('programs').select()
+        const { data, error } = await supabase
+            .from('programs')
+            .select('*, role(*)')
+            .order('customOrder', { ascending: true })
+
+        if (error) {
+            throw new Error(error.message)
+        }
+
+        if (data && data.length > 0) {
+            let ret = []
+            data.forEach((element) => {
+                ret.push({
+                    roleid: element.role.roleid,
+                    name: element.role.name,
+                    displayname: element.displayname,
+                    desc: element.desc,
+                    isStudent: element.role.isStudent,
+                })
+            })
+            return ret
+        } else {
+            throw new Error("Aucune filière n'a été trouvée")
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des filières :', error)
+    }
+}
+
+exports.getRole = async (name) => {
+    try {
+        const { data, error } = await supabase
+            .from('roles')
+            .select()
+            .eq('name', name)
+            .single()
 
         if (error) {
             throw new Error(error.message)
@@ -60,10 +95,10 @@ async function getPrograms() {
         if (data && data.length > 0) {
             return data
         } else {
-            throw new Error("Aucune filière n'a été trouvée")
+            throw new Error("Le role n'a pas été trouvé.")
         }
     } catch (error) {
-        console.error('Erreur lors de la récupération des filières :', error)
+        console.error('Erreur lors de la récupération des roles :', error)
     }
 }
 

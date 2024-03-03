@@ -2,6 +2,7 @@ const {
     getTrackedMessage,
     getPrograms,
     setTrackedMessage,
+    getRole,
 } = require('../misc/database')
 const {
     ActionRowBuilder,
@@ -32,9 +33,52 @@ function setCollector(welcomeMessage) {
     })
 
     collector.on('collect', async (i) => {
-        const selection = i.values[0]
-        await i.reply(`${i.user} has selected ${selection}!`)
+        try {
+            const selection = i.values[0]
+            const role = await getRole(selection)
+            // Vérifier si le rôle existe
+            if (role) {
+                // Ajouter le rôle principal à l'utilisateur
+                await i.member.roles.add(role.roleid)
+                await i.reply({
+                    content: `Vous avez désormais le role ${role.name} !`,
+                    ephemeral: true,
+                })
+                // Si l'utilisateur est un étudiant, ajouter également le rôle "student"
+                if (role.isStudent) {
+                    const studentRole = await getRole('student')
+                    if (studentRole) {
+                        await i.member.roles.add(studentRole.roleid)
+                        await i.reply({
+                            content: `Vous avez également le rôle étudiant.`,
+                            ephemeral: true,
+                        })
+                    } else {
+                        await i.reply({
+                            content: `Le rôle "student" n'a pas été trouvé.`,
+                            ephemeral: true,
+                        })
+                    }
+                }
+            } else {
+                await i.reply({
+                    content: `Le rôle ${selection} n'a pas été trouvé.`,
+                    ephemeral: true,
+                })
+            }
+        } catch (error) {
+            console.error(
+                'Erreur lors de la collecte du composant de message :',
+                error
+            )
+            await i.reply({
+                content:
+                    "Une erreur s'est produite lors de la sélection du rôle.",
+                ephemeral: true,
+            })
+        }
     })
+
     currentCollector = collector
 }
 
@@ -57,9 +101,7 @@ async function buildActionRow() {
     return new ActionRowBuilder().addComponents(programSelect)
 }
 
-async function sendWelcomeMessage(channel) {
-    if (!channel) return
-
+function buildEmbed() {
     const embed = new EmbedBuilder()
         .setAuthor({
             name: 'Etsuko',
@@ -87,6 +129,13 @@ async function sendWelcomeMessage(channel) {
             }
         )
         .setColor('#ff9300')
+    return embed
+}
+
+async function sendWelcomeMessage(channel) {
+    if (!channel) return
+
+    const embed = buildEmbed()
 
     const row = await buildActionRow()
 
