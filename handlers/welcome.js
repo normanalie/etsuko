@@ -65,21 +65,28 @@ async function sendWelcomeMessage(channel) {
             name: 'Etsuko',
             url: 'https://github.com/normanalie/etsuko',
         })
-        .setTitle(`Bienvenue sur le serveur **Tous les ISTY**`)
-        .setDescription('Blablabla')
+        .setTitle('🚀 Bienvenue sur le serveur **__Tous les ISTY__**')
+        .setDescription(
+            "Ce lieu d'échange est dédié à tous les membres de l'ISTY. \nConnectez-vous pour découvrir des espaces uniques : échangez avec vos camarades de promo, dialoguez directement avec vos professeurs, discutez avec d'autres étudiants de votre filière, et créez des liens avec l'ensemble de la communauté ISTY, alignés sur vos passions communes.\n\n."
+        )
         .addFields(
             {
-                name: 'Les règles du serveur',
-                value: 'Lorem ipsum dolor sit Jamet',
+                name: '✅ **Quelques règles à respecter**',
+                value: "1. **Respect et courtoisie** : Respectez toujours les autres membres du serveur et soyez courtois dans vos interactions.\n2. **Contenu approprié** : Assurez-vous que tout contenu partagé sur le serveur est approprié pour un environnement scolaire et professionnel.\n3. **Langage respectueux** : Utilisez un langage respectueux en tout temps, évitez les jurons et les discours offensants.\n4. **Collaboration** : Encouragez la collaboration et le partage d'idées entre les membres du serveur.\n5. **Pas de spam** : Évitez de spammer les canaux avec des messages inutiles ou répétitifs.\n6. **Respect de la vie privée** : Respectez la vie privée des autres membres en ne partageant pas d'informations personnelles sans leur consentement.\n7. **Modération** : Respectez les décisions des modérateurs et des administrateurs du serveur, et suivez leurs instructions en cas de besoin.\n8. **Signalement** : Signalez tout comportement inapproprié ou toute violation des règles aux modérateurs pour une action appropriée.\n\n.",
                 inline: false,
             },
             {
-                name: 'Quelques renseignements',
-                value: "Le bot va t'attribuer automatiquement les rôles.",
+                name: '☎️ **Les contacts**',
+                value: 'Ce serveur est administré par <@638094645670182932>\nLa modération est assurée par:\n- <@279258207267061760>\n- <@333544742354812928>\n- <@97035275686907904>\n- <@394458641358520320>\n- <@290231852755582978>\n- <@240142431570362368>\n- <@272788035383459840>\n- <@125591910982090752>\n- <@282091856530112522>\nLe bot est géré par <@775757989965070387>\n\n.',
+                inline: false,
+            },
+            {
+                name: '📝 **Les rôles**',
+                value: "Pour accéder au serveur, complète le formulaire ci-dessous et le bot t'attribuera tes rôles automatiquement.\n",
                 inline: false,
             }
         )
-        .setColor('#d58800')
+        .setColor('#ff9300')
 
     const row = await buildActionRow()
 
