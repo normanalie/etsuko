@@ -1,9 +1,10 @@
-const { SlashCommandBuilder } = require('discord.js')
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js')
 const { sendWelcomeMessage } = require('../handlers/welcome')
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('initwelcome')
+        .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .setDescription('Envoie le formulaire de bienvenue dans le channel')
         .addChannelOption((option) =>
             option
