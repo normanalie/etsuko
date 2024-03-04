@@ -92,7 +92,7 @@ exports.getRole = async (name) => {
             throw new Error(error.message)
         }
 
-        if (data && data.length > 0) {
+        if (data) {
             return data
         } else {
             throw new Error("Le role n'a pas été trouvé.")

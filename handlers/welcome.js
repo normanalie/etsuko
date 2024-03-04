@@ -36,25 +36,22 @@ function setCollector(welcomeMessage) {
         try {
             const selection = i.values[0]
             const role = await getRole(selection)
-            // Vérifier si le rôle existe
             if (role) {
-                // Ajouter le rôle principal à l'utilisateur
                 await i.member.roles.add(role.roleid)
                 await i.reply({
-                    content: `Vous avez désormais le role ${role.name} !`,
+                    content: `Vous avez désormais le rôle ${role.name} !`,
                     ephemeral: true,
                 })
-                // Si l'utilisateur est un étudiant, ajouter également le rôle "student"
                 if (role.isStudent) {
                     const studentRole = await getRole('student')
                     if (studentRole) {
                         await i.member.roles.add(studentRole.roleid)
-                        await i.reply({
+                        await i.followUp({
                             content: `Vous avez également le rôle étudiant.`,
                             ephemeral: true,
                         })
                     } else {
-                        await i.reply({
+                        await i.followUp({
                             content: `Le rôle "student" n'a pas été trouvé.`,
                             ephemeral: true,
                         })
@@ -71,7 +68,7 @@ function setCollector(welcomeMessage) {
                 'Erreur lors de la collecte du composant de message :',
                 error
             )
-            await i.reply({
+            await i.followUp({
                 content:
                     "Une erreur s'est produite lors de la sélection du rôle.",
                 ephemeral: true,
