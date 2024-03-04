@@ -29,7 +29,6 @@ function setCollector(welcomeMessage) {
     }
     const collector = welcomeMessage.createMessageComponentCollector({
         componentType: ComponentType.StringSelect,
-        time: 3_600_000,
     })
 
     collector.on('collect', async (i) => {
