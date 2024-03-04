@@ -21,65 +21,58 @@ async function handleWelcome(client) {
     setCollector(welcomeMessage)
 }
 
-let currentCollector = null
-function setCollector(welcomeMessage) {
-    if (currentCollector) {
-        console.log('Stopped collector')
-        currentCollector.stop()
+let messageComponentCollector = null
+function setMessageComponentCollector(welcomeMessage) {
+    if (messageComponentCollector) {
+        messageComponentCollector.stop()
     }
     const collector = welcomeMessage.createMessageComponentCollector({
         componentType: ComponentType.StringSelect,
         time: 3_600_000,
     })
 
-    collector.on('collect', async (i) => {
+    collector.on('collect', async (interaction) => {
         try {
-            const selection = i.values[0]
+            const selection = interaction.values[0]
             const role = await getRole(selection)
-            // Vérifier si le rôle existe
+            
             if (role) {
-                // Ajouter le rôle principal à l'utilisateur
-                await i.member.roles.add(role.roleid)
-                await i.reply({
-                    content: `Vous avez désormais le role ${role.name} !`,
+                await interaction.member.roles.add(role.roleid)
+                await interaction.reply({
+                    content: `Vous avez désormais le rôle ${role.name} !`,
                     ephemeral: true,
                 })
-                // Si l'utilisateur est un étudiant, ajouter également le rôle "student"
                 if (role.isStudent) {
                     const studentRole = await getRole('student')
                     if (studentRole) {
-                        await i.member.roles.add(studentRole.roleid)
-                        await i.reply({
+                        await interaction.member.roles.add(studentRole.roleid)
+                        await interaction.reply({
                             content: `Vous avez également le rôle étudiant.`,
                             ephemeral: true,
                         })
                     } else {
-                        await i.reply({
+                        await interaction.reply({
                             content: `Le rôle "student" n'a pas été trouvé.`,
                             ephemeral: true,
                         })
                     }
                 }
             } else {
-                await i.reply({
+                await interaction.reply({
                     content: `Le rôle ${selection} n'a pas été trouvé.`,
                     ephemeral: true,
                 })
             }
         } catch (error) {
-            console.error(
-                'Erreur lors de la collecte du composant de message :',
-                error
-            )
-            await i.reply({
-                content:
-                    "Une erreur s'est produite lors de la sélection du rôle.",
+            console.error('Erreur lors de la collecte du composant de message :', error)
+            await interaction.reply({
+                content: "Une erreur s'est produite lors de la sélection du rôle.",
                 ephemeral: true,
             })
         }
     })
 
-    currentCollector = collector
+    messageComponentCollector = collector
 }
 
 async function buildActionRow() {
