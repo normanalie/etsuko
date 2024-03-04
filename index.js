@@ -11,7 +11,7 @@ const path = require('path')
 
 const { handleSlashCommand } = require('./handlers/commands')
 const { addReactions } = require('./handlers/messages')
-const { newMemberWelcome, handleWelcome } = require('./handlers/welcome')
+const { handleWelcome } = require('./handlers/welcome')
 
 const Etudiants = {
     CPI1: 0,
@@ -60,13 +60,8 @@ client.on('ready', () => {
     console.log(
         `\n\x1b[32m🚀 I am now online, my name is ${client.user.username}\x1b[0m`
     )
-    
-    handleWelcome(client)
-})
 
-client.on('guildMemberAdd', async (member) => {
-    console.log('Guild member add')
-    await newMemberWelcome(member)
+    handleWelcome(client)
 })
 
 client.on('interactionCreate', async (interaction) => {
