@@ -63,7 +63,7 @@ function formatLeaderboard(leaderboard) {
  * @param {Object} channel - Canal Discord où envoyer les mises à jour
  */
 function scheduleLeaderboardUpdate(channel) {
-  const interval = 2000; //12 * 60 * 60 * 1000; // 12 heures en millisecondes
+  const interval = 12 * 60 * 60 * 1000; // 12 heures en millisecondes
 
   // Si un intervalle existe déjà, le nettoyer
   if (updateInterval) {
