@@ -2,6 +2,8 @@ const axios = require('axios');
 const { SlashCommandBuilder } = require('discord.js');
 const { YEAR, SESSION_COOKIE, LEADERBOARD_ID } = require('../asset/credential_aoc.js')
 
+
+let updateInterval = null;
 /**
  * Récupère le classement du leaderboard AoC
  * @returns {Promise<Object|null>} Classement JSON ou null en cas d'erreur
@@ -59,9 +61,14 @@ function formatLeaderboard(leaderboard) {
  * @param {Object} channel - Canal Discord où envoyer les mises à jour
  */
 function scheduleLeaderboardUpdate(channel) {
-  const interval = 12 * 60 * 60 * 1000; // 12 heures en millisecondes
+  const interval = 1000 //12 * 60 * 60 * 1000; // 12 heures en millisecondes
 
-  setInterval(async () => {
+  // Si un intervalle existe déjà, le nettoyer
+  if (updateInterval) {
+    clearInterval(updateInterval);
+  }
+
+  updateInterval = setInterval(async () => {
     const leaderboard = await fetchLeaderboard();
 
     if (!leaderboard) {
@@ -72,30 +79,56 @@ function scheduleLeaderboardUpdate(channel) {
     const classement = formatLeaderboard(leaderboard);
 
     channel.send({
-      content: `📊 **Mise à jour automatique du classement Advent of Code :**
-${classement} 🎉`,
+      content: `📊 **Mise à jour automatique du classement Advent of Code :**\n${classement} 🎉`,
     });
   }, interval);
+}
+
+/**
+ * Arrête la mise à jour automatique du classement
+ */
+function stopLeaderboardUpdate() {
+  if (updateInterval) {
+    clearInterval(updateInterval);
+    updateInterval = null;
+    console.log('Mise à jour automatique arrêtée.');
+  } else {
+    console.log('Aucune mise à jour automatique en cours.');
+  }
 }
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('adventofcode')
-    .setDescription('Affiche le classement de l\'Advent of Code.'),
+    .setDescription('Gère les mises à jour du classement Advent of Code.')
+    .addSubcommand(subcommand => 
+      subcommand
+        .setName('start')
+        .setDescription('Démarre les mises à jour automatiques.'))
+    .addSubcommand(subcommand => 
+      subcommand
+        .setName('stop')
+        .setDescription('Arrête les mises à jour automatiques.')),
   async execute(interaction) {
-    await interaction.deferReply(); // Permet de répondre plus tard si le traitement est long
+    const subcommand = interaction.options.getSubcommand();
 
-    const leaderboard = await fetchLeaderboard();
-    if (!leaderboard) {
-      await interaction.editReply('Impossible de récupérer le classement pour le moment.');
-      return;
+    if (subcommand === 'start') {
+      await interaction.deferReply();
+
+      const leaderboard = await fetchLeaderboard();
+      if (!leaderboard) {
+        await interaction.editReply('Impossible de récupérer le classement pour le moment.');
+        return;
+      }
+
+      const classement = formatLeaderboard(leaderboard);
+      await interaction.editReply('Mise à jour automatique démarrée. Voici le classement actuel :\n' + classement);
+
+      const channel = interaction.channel;
+      scheduleLeaderboardUpdate(channel);
+    } else if (subcommand === 'stop') {
+      stopLeaderboardUpdate();
+      await interaction.reply('Mise à jour automatique arrêtée.');
     }
-
-    const classement = formatLeaderboard(leaderboard);
-    await interaction.editReply(classement);
-
-    // Planifie les mises à jour automatiques toutes les 12 heures dans le même canal
-    const channel = interaction.channel;
-    scheduleLeaderboardUpdate(channel);
   },
 };
