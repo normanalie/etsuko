@@ -1,7 +1,9 @@
 const axios = require('axios');
 const { SlashCommandBuilder } = require('discord.js');
-const { YEAR, SESSION_COOKIE, LEADERBOARD_ID } = require('../asset/credential_aoc.js')
 
+
+const LEADERBOARD_ID = '1033978'; // ID du leaderboard
+const YEAR = '2024'; // Année de l'AoC
 
 let updateInterval = null;
 /**
@@ -13,7 +15,7 @@ async function fetchLeaderboard() {
   try {
     const response = await axios.get(url, {
       headers: {
-        Cookie: `session=${SESSION_COOKIE}`
+        Cookie: `session=${process.env.SESSION_COOKIE}`
       }
     });
     return response.data;
@@ -61,7 +63,7 @@ function formatLeaderboard(leaderboard) {
  * @param {Object} channel - Canal Discord où envoyer les mises à jour
  */
 function scheduleLeaderboardUpdate(channel) {
-  const interval = 1000 //12 * 60 * 60 * 1000; // 12 heures en millisecondes
+  const interval = 2000; //12 * 60 * 60 * 1000; // 12 heures en millisecondes
 
   // Si un intervalle existe déjà, le nettoyer
   if (updateInterval) {
