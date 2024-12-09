@@ -43,11 +43,11 @@ function formatLeaderboard(leaderboard) {
                     
   sortedMembers.forEach((member, index) => {
     if (index < 9){
-      classement += `${medalarray[index]}    ${member.name || 'Anonyme'}    |    ${member.stars || ''}${member.stars ? ':star:' : '   ' }   ** ${member.local_score > 1 ? 'Points' : 'Point'} : ${member.local_score}**\n`;
+      classement += `${medalarray[index]}   `;
     }else{
-      classement += ` ${index + 1}.    ${member.name || 'Anonyme'}    |    ${member.stars || ''} ${member.stars ? ':star:' : '   ' }  ** ${member.local_score > 1 ? 'Points' : 'Point'} : ${member.local_score}**\n`;
+      classement += ` ${index + 1}.   `;
     }
-      
+    classement += ` ${member.name || 'Anonyme'}    |    ${member.stars || ''}${member.stars ? ':star:' : '   ' }   ** ${member.local_score > 1 ? 'Points' : 'Point'} : ${member.local_score}**\n`;
   });
 
 
