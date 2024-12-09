@@ -38,11 +38,11 @@ function formatLeaderboard(leaderboard) {
   const sortedMembers = Object.values(members).sort((a, b) => b.local_score - a.local_score);
   let classement = '# **Classement Advent of Code :two: :zero: :two: :four::**\n\n\n';
   let medalarray = [":first_place:", ":second_place:",":third_place:", 
-                    ":four:",":five:",":six:",":seven:",":eight:",":nine:",":ten:"];
+                    ":four:",":five:",":six:",":seven:",":eight:",":nine:"];
 
                     
   sortedMembers.forEach((member, index) => {
-    if (index < 10){
+    if (index < 9){
       classement += `${medalarray[index]}    ${member.name || 'Anonyme'}    |    ${member.stars || ''}${member.stars ? ':star:' : '   ' }   ** ${member.local_score > 1 ? 'Points' : 'Point'} : ${member.local_score}**\n`;
     }else{
       classement += ` ${index + 1}.    ${member.name || 'Anonyme'}    |    ${member.stars || ''} ${member.stars ? ':star:' : '   ' }  ** ${member.local_score > 1 ? 'Points' : 'Point'} : ${member.local_score}**\n`;
